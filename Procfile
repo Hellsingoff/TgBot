@@ -1,1 +1,1 @@
-web: python main.py --log-file -
+bot: python main.py
