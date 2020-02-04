@@ -1,5 +1,6 @@
 import logging
 import telegram
+import random
 from telegram.error import NetworkError, Unauthorized
 from time import sleep
 from dotenv import load_dotenv
@@ -43,8 +44,10 @@ def echo(bot):
         update_id = update.update_id + 1
 
         if update.message:  # your bot can receive updates without messages
-            # Reply to the message
-            update.message.reply_text(update.message.text)
+            if update.message.text == '/random':
+                update.message.reply_text(random.randint(0, 10))
+            else:
+                update.message.reply_text(update.message.text)
 
 
 if __name__ == '__main__':
