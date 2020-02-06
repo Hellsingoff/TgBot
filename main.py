@@ -47,10 +47,13 @@ def echo(bot):
             if update.message.text == '/random':
                 update.message.reply_text(random.randint(0, 10))
             elif update.message.text == '/whoami':
-                update.message.reply_text(str(update.message.from_user.id) + '\n' + 
-                                              update.message.from_user.username + '\n' +
-                                              update.message.from_user.first_name + '\n' +
-                                              update.message.from_user.last_name)
+                userinfo = str(update.message.from_user.id)
+                if type(update.message.from_user.username) is str:
+                    userinfo += '\n' + update.message.from_user.username
+                if type(update.message.from_user.first_name) is str:
+                    userinfo += '\n' + update.message.from_user.first_name
+                if type(update.message.from_user.last_name) is str:
+                    userinfo += '\n' + update.message.from_user.last_name
             else:
                 update.message.reply_text(update.message.text)
 
