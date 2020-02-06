@@ -54,6 +54,7 @@ def echo(bot):
                     userinfo += '\n' + update.message.from_user.first_name
                 if type(update.message.from_user.last_name) is str:
                     userinfo += '\n' + update.message.from_user.last_name
+                update.message.reply_text(userinfo)
             else:
                 update.message.reply_text(update.message.text)
 
