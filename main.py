@@ -7,14 +7,10 @@ from dotenv import load_dotenv
 from os import getenv
 
 load_dotenv()
-
 update_id = None
 
-
 def main():
-    """Run the bot."""
     global update_id
-    # Telegram Bot Authorization Token
     bot = telegram.Bot(getenv('TG_TOKEN'))
 
     # get the first pending update_id, this is so we can skip over it in case
@@ -37,26 +33,42 @@ def main():
 
 
 def echo(bot):
-    """Echo the message the user sent."""
     global update_id
+    commands = {'/start': start,
+                '/rename': rename,
+                '/random': random_num,
+                '/whoami': whoami}
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
-
         if update.message:  # your bot can receive updates without messages
-            if update.message.text == '/random':
-                update.message.reply_text(random.randint(0, 10))
-            elif update.message.text == '/whoami':
-                userinfo = str(update.message.from_user.id)
-                if type(update.message.from_user.username) is str:
-                    userinfo += '\n' + update.message.from_user.username
-                if type(update.message.from_user.first_name) is str:
-                    userinfo += '\n' + update.message.from_user.first_name
-                if type(update.message.from_user.last_name) is str:
-                    userinfo += '\n' + update.message.from_user.last_name
-                update.message.reply_text(userinfo)
+            if update.message.text in commands:
+                commands.get(update.message.text)(update.message)
             else:
                 update.message.reply_text(update.message.text)
+
+
+def start(message):
+    message.reply_text('Hello!') # TO DO
+
+
+def rename(message):
+    message.reply_text('WIP...') # TO DO
+
+
+def random_num(message):
+    message.reply_text(random.randint(0, 10))
+
+
+def whoami(message):
+    userinfo = 'id: ' + str(message.from_user.id)
+    if type(message.from_user.username) is str:
+        userinfo += '\n' + 'Nickname: ' + message.from_user.username
+    if type(message.from_user.first_name) is str:
+        userinfo += '\n' + 'F.Name: ' + message.from_user.first_name
+    if type(message.from_user.last_name) is str:
+        userinfo += '\n' + 'L.Name: ' + message.from_user.last_name
+    message.reply_text(userinfo)
 
 
 if __name__ == '__main__':
