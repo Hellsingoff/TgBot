@@ -39,7 +39,7 @@ def echo(bot):
     commands = {'/start': start,
                 '/rename': rename,
                 '/random': random_num,
-                '/whoami': whoami
+                '/whoami': whoami,
                 '/db': print_db}
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
