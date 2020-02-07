@@ -5,9 +5,11 @@ from telegram.error import NetworkError, Unauthorized
 from time import sleep
 from dotenv import load_dotenv
 from os import getenv
+import psycopg2 as psql
 
 load_dotenv()
 update_id = None
+database = psql.connect(getenv('DATABASE_URL'), sslmode='require')
 
 def main():
     global update_id
@@ -37,7 +39,8 @@ def echo(bot):
     commands = {'/start': start,
                 '/rename': rename,
                 '/random': random_num,
-                '/whoami': whoami}
+                '/whoami': whoami
+                '/db': print_db}
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
@@ -69,6 +72,13 @@ def whoami(message):
     if type(message.from_user.last_name) is str:
         userinfo += '\n' + 'L.Name: ' + message.from_user.last_name
     message.reply_text(userinfo)
+
+
+def print_db(message):
+    sql = database.cursor()
+    sql.execute("SELECT * FROM users;")
+    message.reply_text(str(sql.fetchone()))
+    sql.close()
 
 
 if __name__ == '__main__':
