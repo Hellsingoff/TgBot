@@ -100,7 +100,7 @@ def print_db(message):
     table = sql.fetchall()
     text = ''
     for row in table:
-        text += str(row)
+        text += str(row) + '\n'
     message.reply_text(text)
     sql.close()
 
