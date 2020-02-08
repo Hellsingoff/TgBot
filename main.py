@@ -55,9 +55,9 @@ def echo(bot):
 def start(message):
     id = message.from_user.id
     sql = database.cursor()
-    if sql.execute("SELECT nickname FROM users WHERE id = %s;", id) != None:
-        nick = sql.execute("SELECT nickname FROM users WHERE id = %s;", id)
-        message.reply_text('%s allready exists in db!', nick)
+    nickname = sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
+    if nickname != None:
+        message.reply_text('%s already exists in db!', nickname)
     else:
         if type(message.from_user.username) is str:
             nickname = message.from_user.username
@@ -69,7 +69,7 @@ def start(message):
             nickname = str(message.from_user.id)
         sql.execute("INSERT INTO users (id, nickname)" +
                     " VALUES(%s, %s);", (id, nickname))
-        message.reply_text('Hello, %s!', nickname)
+        message.reply_text('Hello, %s!', [nickname])
     sql.close()
 
 
