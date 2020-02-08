@@ -64,7 +64,7 @@ def start(message):
         nickname = str(message.from_user.id)
     sql = database.cursor()
     sql.execute("INSERT INTO users (id, nickname)" +
-                " VALUES(%s, '%s');", (id, nickname))
+                " VALUES(%s, %s);", (id, nickname))
     sql.close()
     message.reply_text('Hello, %s!', nickname)
 
