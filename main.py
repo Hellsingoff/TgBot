@@ -97,7 +97,7 @@ def whoami(message):
 def print_db(message):
     sql = database.cursor()
     sql.execute("SELECT * FROM users;")
-    table = sql.fetchone()
+    table = sql.fetchall()
     text = ''
     for row in table:
         text += str(row)
