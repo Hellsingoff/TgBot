@@ -59,7 +59,7 @@ def start(message):
     sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
     nickname = sql.fetchone()
     if nickname != None:
-        message.reply_text('%s is already exists in db!' % nickname)
+        message.reply_text(f'{nickname} is already exists in db!')
     else:
         if type(message.from_user.username) is str:
             nickname = message.from_user.username
@@ -70,8 +70,8 @@ def start(message):
         else:
             nickname = str(message.from_user.id)
         sql.execute("INSERT INTO users (id, nickname)" +
-                    " VALUES(%s, %s);", (id, nickname))
-        message.reply_text('Hello, %s!' % nickname)
+                    " VALUES(%s, %s);", (id, nickname[:16]))
+        message.reply_text(f'Hello, {nickname}!')
     sql.close()
 
 
@@ -97,7 +97,11 @@ def whoami(message):
 def print_db(message):
     sql = database.cursor()
     sql.execute("SELECT * FROM users;")
-    message.reply_text(str(sql.fetchone()))
+    table = sql.fetchone()
+    text = ''
+    for row in table:
+        text += str(row[0]) + ': ' + row[1]
+    message.reply_text(text)
     sql.close()
 
 
