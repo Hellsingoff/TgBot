@@ -15,14 +15,15 @@ def main():
     global update_id
     bot = telegram.Bot(getenv('TG_TOKEN'))
 
-    # get the first pending update_id, this is so we can skip over it in case
-    # we get an "Unauthorized" exception.
+    # get the first pending update_id, this is so we can skip over it
+    # in case we get an "Unauthorized" exception.
     try:
         update_id = bot.get_updates()[0].update_id
     except IndexError:
         update_id = None
 
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(format='%(asctime)s - %(name)s - ' \
+                               '%(levelname)s - %(message)s')
 
     while True:
         try:
@@ -44,7 +45,7 @@ def echo(bot):
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
-        if update.message:  # your bot can receive updates without messages
+        if update.message:  # bot can receive updates without messages
             if update.message.text in commands:
                 commands.get(update.message.text)(update.message)
             else:
@@ -52,7 +53,20 @@ def echo(bot):
 
 
 def start(message):
-    message.reply_text('Hello!') # TO DO
+    id = message.from_user.id
+    if type(message.from_user.username) is str:
+        nickname = message.from_user.username
+    elif type(message.from_user.first_name) is str:
+        nickname = message.from_user.first_name
+    elif type(message.from_user.last_name) is str:
+        nickname = message.from_user.last_name
+    else:
+        nickname = str(message.from_user.id)
+    sql = database.cursor()
+    sql.execute("INSERT INTO users (id, nickname)' \
+                ' VALUES(%s, '%s');", (id, nickname))
+    sql.close()
+    message.reply_text('Hello, %s!', nickname)
 
 
 def rename(message):
