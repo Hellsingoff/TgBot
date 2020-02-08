@@ -10,6 +10,7 @@ import psycopg2 as psql
 load_dotenv()
 update_id = None
 database = psql.connect(getenv('DATABASE_URL'), sslmode='require')
+database.autocommit = True
 
 def main():
     global update_id
@@ -57,7 +58,7 @@ def start(message):
     sql = database.cursor()
     sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
     if sql.fetchone() != None:
-        message.reply_text('%s already exists in db!', sql.fetchone())
+        message.reply_text('%s is already exists in db!' % sql.fetchone())
     else:
         if type(message.from_user.username) is str:
             nickname = message.from_user.username
@@ -69,7 +70,7 @@ def start(message):
             nickname = str(message.from_user.id)
         sql.execute("INSERT INTO users (id, nickname)" +
                     " VALUES(%s, %s);", (id, nickname))
-        message.reply_text('Hello, %s!', [nickname])
+        message.reply_text('Hello, %s!' % nickname)
     sql.close()
 
 
