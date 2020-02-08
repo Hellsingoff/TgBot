@@ -54,19 +54,23 @@ def echo(bot):
 
 def start(message):
     id = message.from_user.id
-    if type(message.from_user.username) is str:
-        nickname = message.from_user.username
-    elif type(message.from_user.first_name) is str:
-        nickname = message.from_user.first_name
-    elif type(message.from_user.last_name) is str:
-        nickname = message.from_user.last_name
-    else:
-        nickname = str(message.from_user.id)
     sql = database.cursor()
-    sql.execute("INSERT INTO users (id, nickname)" +
-                " VALUES(%s, %s);", (id, nickname))
+    if sql.execute("SELECT nickname FROM users WHERE id = %s;", id) != None:
+        nick = sql.execute("SELECT nickname FROM users WHERE id = %s;", id)
+        message.reply_text('%s allready exists in db!', nick)
+    else:
+        if type(message.from_user.username) is str:
+            nickname = message.from_user.username
+        elif type(message.from_user.first_name) is str:
+            nickname = message.from_user.first_name
+        elif type(message.from_user.last_name) is str:
+            nickname = message.from_user.last_name
+        else:
+            nickname = str(message.from_user.id)
+        sql.execute("INSERT INTO users (id, nickname)" +
+                    " VALUES(%s, %s);", (id, nickname))
+        message.reply_text('Hello, %s!', nickname)
     sql.close()
-    message.reply_text('Hello, %s!', nickname)
 
 
 def rename(message):
