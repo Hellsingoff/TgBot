@@ -55,9 +55,9 @@ def echo(bot):
 def start(message):
     id = message.from_user.id
     sql = database.cursor()
-    nickname = sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
-    if nickname != None:
-        message.reply_text('%s already exists in db!', nickname)
+    sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
+    if sql.fetchone() != None:
+        message.reply_text('%s already exists in db!', sql.fetchone())
     else:
         if type(message.from_user.username) is str:
             nickname = message.from_user.username
