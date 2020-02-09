@@ -71,12 +71,12 @@ def start(message):
         elif type(message.from_user.last_name) is str:
             nickname = message.from_user.last_name[:16]
         else:
-            nickname = nickname_generation(sql, 'Player')
+            nickname = nickname_generator(sql, 'Player')
         sql.execute("SELECT nickname FROM users "
                     "WHERE nickname = %s;", [nickname])
         if sql.fetchone() != None:
             reply += f'{nickname}, your name has already been taken.\n'
-            nickname = nickname_generation(sql, nickname)
+            nickname = nickname_generator(sql, nickname)
             reply += f'We will call you {nickname}.\n'
         sql.execute("INSERT INTO users (id, nickname) " +
                     "VALUES(%s, %s);", (id, nickname))
@@ -131,15 +131,16 @@ def db_add(message):
     print_db(message)
 
 
-def nickname_generation(sql, nickname):
+def nickname_generator(sql, nickname):
     counter = 0
-    while nickname != None:
+    check_name = nickname
+    while check_name != None:
         counter += 1
+        if len(nickname + str(counter)) > 16:
+            return nickname_generator(sql, 'Player')
         sql.execute("SELECT nickname FROM users " +
                     "WHERE nickname = %s;", [nickname + str(counter)])
-        nickname = sql.fetchone()
-        if len(nickname + str(counter)) > 16:
-            return nickname_generation(sql, 'Player')
+        check_name = sql.fetchone()
     return nickname + str(counter)
 
 
