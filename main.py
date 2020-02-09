@@ -42,13 +42,15 @@ def echo(bot):
                 '/rename': rename,
                 '/random': random_num,
                 '/whoami': whoami,
-                '/db': print_db}
+                '/db': print_db,
+                '/dbremove': db_remove,
+                '/dbadd': db_add}
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
         if update.message:  # bot can receive updates without messages
-            if update.message.text in commands:
-                commands.get(update.message.text)(update.message)
+            if update.message.text.split()[0] in commands:
+                commands.get(update.message.text.split()[0])(update.message)
             else:
                 update.message.reply_text(update.message.text)
 
@@ -76,8 +78,8 @@ def start(message):
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = nickname_generation(sql, nickname)
             reply += f'We will call you {nickname}.\n'
-        sql.execute("INSERT INTO users (id, nickname)" +
-                    " VALUES(%s, %s);", (id, nickname))
+        sql.execute("INSERT INTO users (id, nickname) " +
+                    "VALUES(%s, %s);", (id, nickname))
         message.reply_text(reply + f'Hello, {nickname}!')
     sql.close()
 
@@ -110,6 +112,23 @@ def print_db(message):
         text += str(row) + '\n'
     message.reply_text(text)
     sql.close()
+
+
+def db_remove(message):
+    sql = database.cursor()
+    sql.execute("DELETE FROM users WHERE id = %s;", [message.text.split()[1]])
+    sql.close()
+    print_db(message)
+
+
+def db_add(message):
+    sql = database.cursor()
+    id = int(message.text.split()[1])
+    nickname = message.text.split()[2]
+    sql.execute("INSERT INTO users (id, nickname) " +
+                "VALUES(%s, %s);", (id, nickname))
+    sql.close()
+    print_db(message)
 
 
 def nickname_generation(sql, nickname):
