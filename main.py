@@ -55,23 +55,30 @@ def echo(bot):
 
 def start(message):
     id = message.from_user.id
+    reply = ''
     sql = database.cursor()
     sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
     nickname = sql.fetchone()
     if nickname != None:
-        message.reply_text(f'{nickname} is already exists in db!')
+        message.reply_text(f'{nickname}, you are already exist in db!')
     else:
         if type(message.from_user.username) is str:
-            nickname = message.from_user.username
+            nickname = message.from_user.username[:16]
         elif type(message.from_user.first_name) is str:
-            nickname = message.from_user.first_name
+            nickname = message.from_user.first_name[:16]
         elif type(message.from_user.last_name) is str:
-            nickname = message.from_user.last_name
+            nickname = message.from_user.last_name[:16]
         else:
-            nickname = str(message.from_user.id)
+            nickname = nickname_generation(sql, 'Player')
+        sql.execute("SELECT nickname FROM users "
+                    "WHERE nickname = %s;", [nickname])
+        if sql.fetchone() != None:
+            reply += f'{nickname}, your name has already been taken.\n'
+            nickname = nickname_generation(sql, nickname)
+            reply += f'We will call you {nickname}.\n'
         sql.execute("INSERT INTO users (id, nickname)" +
-                    " VALUES(%s, %s);", (id, nickname[:16]))
-        message.reply_text(f'Hello, {nickname}!')
+                    " VALUES(%s, %s);", (id, nickname))
+        message.reply_text(reply + f'Hello, {nickname}!')
     sql.close()
 
 
@@ -103,6 +110,18 @@ def print_db(message):
         text += str(row) + '\n'
     message.reply_text(text)
     sql.close()
+
+
+def nickname_generation(sql, nickname):
+    counter = 0
+    while nickname != None:
+        counter += 1
+        sql.execute("SELECT nickname FROM users " +
+                    "WHERE nickname = %s;", [nickname + str(counter)])
+        nickname = sql.fetchone()
+        if len(nickname + str(counter)) > 16:
+            return nickname_generation(sql, 'Player')
+    return nickname + str(counter)
 
 
 if __name__ == '__main__':
