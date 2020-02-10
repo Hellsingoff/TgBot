@@ -95,6 +95,9 @@ def start(message):
 
 
 def whisper(message):
+    if message.text.split() < 3:
+        message.reply_text('Error!')
+        return
     input_text = message.text.split()[1:]
     sql = database.cursor()
     sql.execute("SELECT id FROM users " +
