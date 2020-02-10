@@ -57,16 +57,18 @@ def echo(bot):
 
 def start(message):
     id = message.from_user.id
+    if len(message.text.split()) > 2: # tmp to test db
+        try:
+            id = int(message.text.split()[1])
     reply = ''
     sql = database.cursor()
     sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
     nickname = sql.fetchone()
     if nickname != None:
-        message.reply_text(f'{nickname}, you are already exist in db!')
+        message.reply_text(f'{nickname[0]}, you are already exist in db!')
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
-                id = int(message.text.split()[1])
                 nickname = ' '.join(message.text.split()[2:])
             except:
                 nickname = nickname_generator(sql, 'Player')
