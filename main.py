@@ -48,7 +48,7 @@ def echo(bot):
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
-        if update.message:  # bot can receive updates without messages
+        if update.message and update.message.text != None:
             if update.message.text.split()[0] in commands:
                 commands.get(update.message.text.split()[0])(update.message)
             else:
@@ -72,7 +72,7 @@ def start(message):
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
-                nickname = ' '.join(message.text.split()[2:])[:16]
+                nickname = ''.join(message.text.split()[2:])[:16]
             except:
                 nickname = nickname_generator(sql, 'Player')
         elif type(message.from_user.username) is str:
