@@ -100,9 +100,14 @@ def whisper(message):
     sql.execute("SELECT id FROM users " +
                 "WHERE nickname = %s;", [input_text[0]])
     target = sql.fetchone()[0]
+    sql.execute("SELECT nickname FROM users " +
+                "WHERE id = %s;", [message.from_user.id])
+    sender = sql.fetchone()[0]
+    text_to_send = sender + ' '.join(input_text[1:])
     sql.close()
     try:
-        bot.send_message(chat_id=target, text=' '.join(input_text[1:]))
+        bot.send_message(chat_id=target, text=text_to_send)
+        message.reply_text(text_to_send)
     except:
         message.reply_text('Error!')
 
