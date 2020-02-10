@@ -64,7 +64,13 @@ def start(message):
     if nickname != None:
         message.reply_text(f'{nickname}, you are already exist in db!')
     else:
-        if type(message.from_user.username) is str:
+        if len(message.text.split()) > 2: # tmp to test db
+            try:
+                id = int(message.text.split()[1])
+                nickname = ' '.join(message.text.split()[2:])
+            except:
+                nickname = nickname_generator(sql, 'Player')
+        elif type(message.from_user.username) is str:
             nickname = message.from_user.username[:16]
         elif type(message.from_user.first_name) is str:
             nickname = message.from_user.first_name[:16]
