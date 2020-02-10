@@ -14,7 +14,7 @@ database.autocommit = True
 
 def main():
     global update_id
-    bot = telegram.Bot(getenv('TG_TOKEN'))
+    global bot = telegram.Bot(getenv('TG_TOKEN'))
 
     # get the first pending update_id, this is so we can skip over it
     # in case we get an "Unauthorized" exception.
@@ -43,7 +43,8 @@ def echo(bot):
                 '/random': random_num,
                 '/whoami': whoami,
                 '/db': print_db,
-                '/dbremove': db_remove}
+                '/dbremove': db_remove,
+                '/whisper': whisper}
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
@@ -56,11 +57,9 @@ def echo(bot):
 
 def start(message):
     id = message.from_user.id
-    chat_id = message.chat.id
-    if len(message.text.split()) > 3: # tmp to test db
+    if len(message.text.split()) > 2: # tmp to test db
         try:
             id = int(message.text.split()[1])
-            chat_id = int(message.text.split()[2])
         except:
             message.reply_text('Error!')
             return
@@ -73,7 +72,7 @@ def start(message):
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
-                nickname = ''.join(message.text.split()[3:])[:16]
+                nickname = ''.join(message.text.split()[2:])[:16]
             except:
                 nickname = nickname_generator(sql, 'Player')
         elif type(message.from_user.username) is str:
@@ -84,16 +83,29 @@ def start(message):
             nickname = message.from_user.last_name[:16]
         else:
             nickname = nickname_generator(sql, 'Player')
-        sql.execute("SELECT nickname FROM users "
+        sql.execute("SELECT nickname FROM users " +
                     "WHERE nickname = %s;", [nickname])
         if sql.fetchone() != None:
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = nickname_generator(sql, nickname)
             reply += f'We will call you {nickname}.\n'
-        sql.execute("INSERT INTO users (id, nickname, chat_id) " +
-                    "VALUES(%s, %s, %s);", (id, nickname, chat_id))
+        sql.execute("INSERT INTO users (id, nickname) " +
+                    "VALUES(%s, %s);", (id, nickname))
         message.reply_text(reply + f'Hello, {nickname}!')
     sql.close()
+
+
+def whisper(message):
+    input_text = message.text.split()[1:]
+    sql = database.cursor()
+    sql.execute("SELECT id FROM users " +
+                "WHERE nickname = %s;", [input_text[0]])
+    target = sql.fetchone()[0]
+    sql.close()
+    try:
+        bot.send_message(chat_id=target, text=' '.join(input_text[1:]))
+    except:
+        message.reply_text('Error!')
 
 
 def rename(message):
@@ -105,8 +117,7 @@ def random_num(message):
 
 
 def whoami(message):
-    userinfo = ('Chat id: ' + str(message.chat.id) + 
-               '\nUser id: ' + str(message.from_user.id))
+    userinfo = 'id: ' + str(message.from_user.id)
     if type(message.from_user.username) is str:
         userinfo += '\n' + 'Nickname: ' + message.from_user.username
     if type(message.from_user.first_name) is str:
