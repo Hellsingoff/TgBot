@@ -116,17 +116,23 @@ def print_db(message):
 
 def db_remove(message):
     sql = database.cursor()
-    sql.execute("DELETE FROM users WHERE id = %s;", [message.text.split()[1]])
+    try:
+        sql.execute("DELETE FROM users WHERE id = %s;", [message.text.split()[1]])
+    except:
+        message.reply_text("Error!")
     sql.close()
     print_db(message)
 
 
 def db_add(message):
     sql = database.cursor()
-    id = int(message.text.split()[1])
-    nickname = message.text.split()[2]
-    sql.execute("INSERT INTO users (id, nickname) " +
-                "VALUES(%s, %s);", (id, nickname))
+    try:
+        id = int(message.text.split()[1])
+        nickname = message.text.split()[2]
+        sql.execute("INSERT INTO users (id, nickname) " +
+                    "VALUES(%s, %s);", (id, nickname))
+    except:
+        message.reply_text("Error!")
     sql.close()
     print_db(message)
 
