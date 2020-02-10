@@ -60,6 +60,9 @@ def start(message):
     if len(message.text.split()) > 2: # tmp to test db
         try:
             id = int(message.text.split()[1])
+        except:
+            message.reply_text('Error!')
+            return
     reply = ''
     sql = database.cursor()
     sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
