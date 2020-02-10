@@ -91,7 +91,7 @@ def start(message):
             nickname = nickname_generator(sql, nickname)
             reply += f'We will call you {nickname}.\n'
         sql.execute("INSERT INTO users (id, nickname, chat_id) " +
-                    "VALUES(%s, %s);", (id, nickname, chat_id))
+                    "VALUES(%s, %s, %s);", (id, nickname, chat_id))
         message.reply_text(reply + f'Hello, {nickname}!')
     sql.close()
 
@@ -105,7 +105,8 @@ def random_num(message):
 
 
 def whoami(message):
-    userinfo = 'id: ' + str(message.from_user.id)
+    userinfo = 'Chat id: ' + str(message.chat.id) + 
+               '\nUser id: ' + str(message.from_user.id)
     if type(message.from_user.username) is str:
         userinfo += '\n' + 'Nickname: ' + message.from_user.username
     if type(message.from_user.first_name) is str:
