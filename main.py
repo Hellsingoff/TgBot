@@ -11,11 +11,10 @@ load_dotenv()
 update_id = None
 database = psql.connect(getenv('DATABASE_URL'), sslmode='require')
 database.autocommit = True
+bot = telegram.Bot(getenv('TG_TOKEN'))
 
 def main():
     global update_id
-    global bot = telegram.Bot(getenv('TG_TOKEN'))
-
     # get the first pending update_id, this is so we can skip over it
     # in case we get an "Unauthorized" exception.
     try:
