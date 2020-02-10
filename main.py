@@ -103,7 +103,7 @@ def whisper(message):
     sql.execute("SELECT nickname FROM users " +
                 "WHERE id = %s;", [message.from_user.id])
     sender = sql.fetchone()[0]
-    text_to_send = sender + ' '.join(input_text[1:])
+    text_to_send = sender +': ' + ' '.join(input_text[1:])
     sql.close()
     try:
         bot.send_message(chat_id=target, text=text_to_send)
