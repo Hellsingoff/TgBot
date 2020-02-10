@@ -72,7 +72,7 @@ def start(message):
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
-                nickname = ' '.join(message.text.split()[2:])
+                nickname = ' '.join(message.text.split()[2:])[:16]
             except:
                 nickname = nickname_generator(sql, 'Player')
         elif type(message.from_user.username) is str:
