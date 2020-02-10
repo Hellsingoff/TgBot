@@ -105,8 +105,8 @@ def random_num(message):
 
 
 def whoami(message):
-    userinfo = 'Chat id: ' + str(message.chat.id) + 
-               '\nUser id: ' + str(message.from_user.id)
+    userinfo = ('Chat id: ' + str(message.chat.id) + 
+               '\nUser id: ' + str(message.from_user.id))
     if type(message.from_user.username) is str:
         userinfo += '\n' + 'Nickname: ' + message.from_user.username
     if type(message.from_user.first_name) is str:
