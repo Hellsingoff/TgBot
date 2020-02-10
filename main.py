@@ -43,8 +43,7 @@ def echo(bot):
                 '/random': random_num,
                 '/whoami': whoami,
                 '/db': print_db,
-                '/dbremove': db_remove,
-                '/dbadd': db_add}
+                '/dbremove': db_remove}
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
@@ -57,9 +56,11 @@ def echo(bot):
 
 def start(message):
     id = message.from_user.id
-    if len(message.text.split()) > 2: # tmp to test db
+    chat_id = message.chat.id
+    if len(message.text.split()) > 3: # tmp to test db
         try:
             id = int(message.text.split()[1])
+            chat_id = int(message.text.split()[2])
         except:
             message.reply_text('Error!')
             return
@@ -72,7 +73,7 @@ def start(message):
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
-                nickname = ''.join(message.text.split()[2:])[:16]
+                nickname = ''.join(message.text.split()[3:])[:16]
             except:
                 nickname = nickname_generator(sql, 'Player')
         elif type(message.from_user.username) is str:
@@ -89,8 +90,8 @@ def start(message):
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = nickname_generator(sql, nickname)
             reply += f'We will call you {nickname}.\n'
-        sql.execute("INSERT INTO users (id, nickname) " +
-                    "VALUES(%s, %s);", (id, nickname))
+        sql.execute("INSERT INTO users (id, nickname, chat_id) " +
+                    "VALUES(%s, %s);", (id, nickname, chat_id))
         message.reply_text(reply + f'Hello, {nickname}!')
     sql.close()
 
@@ -129,19 +130,6 @@ def db_remove(message):
     sql = database.cursor()
     try:
         sql.execute("DELETE FROM users WHERE id = %s;", [message.text.split()[1]])
-    except:
-        message.reply_text("Error!")
-    sql.close()
-    print_db(message)
-
-
-def db_add(message):
-    sql = database.cursor()
-    try:
-        id = int(message.text.split()[1])
-        nickname = message.text.split()[2]
-        sql.execute("INSERT INTO users (id, nickname) " +
-                    "VALUES(%s, %s);", (id, nickname))
     except:
         message.reply_text("Error!")
     sql.close()
