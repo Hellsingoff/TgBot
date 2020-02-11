@@ -1,8 +1,7 @@
-from time import sleep
 from dotenv import load_dotenv
 from os import getenv
 from aiogram import Bot, Dispatcher, executor, types
-import asyncio
+from asyncio import sleep
 
 
 load_dotenv()
@@ -11,10 +10,10 @@ dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands=['sleep'])
-async def send_welcome(message: types.Message):
+async def sleeping(message: types.Message):
     for i in range(30, 0, -10):
         await message.answer(i)
-        await asyncio.sleep(10)
+        await sleep(10)
     await message.answer(0)
 
 
