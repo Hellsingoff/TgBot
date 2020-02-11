@@ -12,12 +12,10 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands=['sleep'])
 async def send_welcome(message: types.Message):
-    for i in range(30, 0, -1):
-        if i % 10 == 0:
-            await message.answer(i)
-        await asyncio.sleep(1)
+    for i in range(30, 0, -10):
+        await message.answer(i)
+        await asyncio.sleep(10)
     await message.answer(0)
-
 
 
 @dp.message_handler()
