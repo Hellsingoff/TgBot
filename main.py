@@ -99,6 +99,7 @@ def whisper(message):
         message.reply_text('Error!')
         return
     input_text = message.text.split()[1:]
+    bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     sql = database.cursor()
     sql.execute("SELECT id FROM users " +
                 "WHERE nickname = %s;", [input_text[0]])
