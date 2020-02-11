@@ -1,2 +1,3 @@
 aiogram
+asyncio
 python-dotenv
