@@ -1,3 +1,2 @@
-python-telegram-bot
+aiogram
 python-dotenv
-psycopg2-binary
