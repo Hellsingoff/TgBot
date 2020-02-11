@@ -43,7 +43,7 @@ def echo(bot):
                 '/whoami': whoami,
                 '/db': print_db,
                 '/dbremove': db_remove,
-                '/whisper': whisper}
+                '/w': whisper}
     # Request updates after the last update_id
     for update in bot.get_updates(offset=update_id, timeout=10):
         update_id = update.update_id + 1
@@ -96,10 +96,10 @@ def start(message):
 
 def whisper(message):
     if len(message.text.split()) < 3:
-        message.reply_text('Error!')
+        message.reply_text('Usage: /w username message')
         return
-    input_text = message.text.split()[1:]
     bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    input_text = message.text.split()[1:]
     sql = database.cursor()
     sql.execute("SELECT id FROM users " +
                 "WHERE nickname = %s;", [input_text[0]])
@@ -113,7 +113,7 @@ def whisper(message):
         bot.send_message(chat_id=target, text=text_to_send)
         message.reply_text(text_to_send)
     except:
-        message.reply_text('Error!')
+        message.reply_text('Error :(\nTarget user stoped the bot?')
 
 
 def rename(message):
