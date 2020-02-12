@@ -12,12 +12,13 @@ dp = Dispatcher(bot)
 db = connect(getenv('DATABASE_URL'))
 
 
-class Users(Model):
+class User(Model):
     id = IntegerField(null=False, unique=True, primary_key=True)
     nickname = CharField(null=False, unique=True, primary_key=True,
                          max_length=16)
     class Meta:
         database = db
+        db_table = users
 
 
 @dp.message_handler(commands=['sleep'])
@@ -38,7 +39,7 @@ async def start(message: types.Message):
             message.reply('Error!')
             return
     reply = ''
-    nickname = Users.get(Users.id == id).nickname
+    nickname = User.get(User.id == id).nickname
     if nickname != None:
         await message.answer(f'{nickname[0]}, you are already exist in db!')
     else:
@@ -55,11 +56,11 @@ async def start(message: types.Message):
             nickname = message.from_user.last_name[:16]
         else:
             nickname = nickname_generator('Player')
-        if Users.get(Users.nickname == nickname) != None:
+        if User.get(User.nickname == nickname) != None:
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = await nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
-        Users.create(id=id, nickname=nickname)
+        User.create(id=id, nickname=nickname)
         await message.answer(reply + f'Hello, {nickname}!')
 
 
@@ -75,7 +76,7 @@ def nickname_generator(nickname):
         counter += 1
         if len(nickname + str(counter)) > 16:
             return nickname_generator('Player')
-        check_name = Users.get(Users.nickname == nickname).nickname
+        check_name = User.get(User.nickname == nickname).nickname
     return nickname + str(counter)
 
 
