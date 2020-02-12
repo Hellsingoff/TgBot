@@ -38,10 +38,9 @@ async def start(message: types.Message):
             message.reply('Error!')
             return
     reply = ''
-    nickname = User.select().where(User.id == id)
-    await message.answer(nickname)
-    if nickname != None:
-        await message.answer(f'{nickname}, you are already exist in db!')
+    user = User.select().where(User.id == id)
+    if user.exists():
+        await message.answer(f'{user.nickname}, you are already exist in db!')
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
@@ -56,7 +55,8 @@ async def start(message: types.Message):
             nickname = message.from_user.last_name[:16]
         else:
             nickname = nickname_generator('Player')
-        if User.get(User.nickname == nickname) != None:
+        user = User.select().where(User.nickname == nickname)
+        if user.exists():
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = await nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
@@ -70,13 +70,14 @@ async def echo(message: types.Message):
 
 
 def nickname_generator(nickname):
-    counter = 0
-    check_name = nickname
-    while check_name != None:
+    counter = 1
+    check_name = User.select().where(User.nickname == nickname + str(counter))
+    while check_name.exists():
         counter += 1
         if len(nickname + str(counter)) > 16:
             return nickname_generator('Player')
-        check_name = User.get(User.nickname == nickname).nickname
+        check_name = User.select().where(User.nickname == nickname
+                                                        + str(counter))
     return nickname + str(counter)
 
 
