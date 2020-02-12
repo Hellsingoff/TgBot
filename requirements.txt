@@ -1,4 +1,4 @@
 aiogram
 asyncio
 python-dotenv
-psycopg2
+peewee
