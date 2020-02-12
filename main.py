@@ -62,8 +62,8 @@ async def start(message: types.Message):
 
 
 @dp.message_handler()
-def echo(message: types.Message):
-    message.answer(message.text)
+async def echo(message: types.Message):
+    await message.answer(message.text)
 
 
 if __name__ == '__main__':
