@@ -108,29 +108,26 @@ async def db_remove(message: types.Message):
         await message.answer('Error!')
     await print_db(message)
 
-'''
+
 @dp.message_handler(commands=['w'])
-def whisper(message):
+async def whisper(message: types.Message):
     if len(message.text.split()) < 3:
         await message.answer('Usage: /w username message')
         return
-    bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     input_text = message.text.split()[1:]
-    sql = database.cursor()
-    sql.execute("SELECT id FROM users " +
-                "WHERE nickname = %s;", [input_text[0]])
-    target = sql.fetchone()[0]
-    sql.execute("SELECT nickname FROM users " +
-                "WHERE id = %s;", [message.from_user.id])
-    sender = sql.fetchone()[0]
-    text_to_send = sender +': ' + ' '.join(input_text[1:])
-    sql.close()
-    try:
-        bot.send_message(chat_id=target, text=text_to_send)
-        message.reply_text(text_to_send)
-    except:
-        message.reply_text('Error :(\nTarget user stoped the bot?')
-'''
+    target = User.select().where(User.nickname == input_text[0])
+    if target.exists():
+        target = target.get().id
+        sender = User.get(User.id == message.from_user.id).nickname
+        text_to_send = sender +': ' + ' '.join(input_text[1:])
+        try:
+            await bot.send_message(chat_id=target, text=text_to_send)
+            await message.answer(text_to_send)
+        except:
+            await message.answer('Error :(\nTarget user stoped the bot?')
+    else:
+        await message.answer('User not found.')
 
 
 @dp.message_handler()
