@@ -106,7 +106,7 @@ async def db_remove(message: types.Message):
             user = User.select().where(User.id == id)
             await message.answer(user) #test
             if user.exists():
-                user.delete_instance()
+                user.get().delete_instance()
     except:
         await message.answer('Error!')
     await print_db(message)
