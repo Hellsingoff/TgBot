@@ -15,9 +15,9 @@ database.autocommit = True
 @dp.message_handler(commands=['sleep'])
 async def sleeping(message: types.Message):
     for i in range(30, 0, -10):
-        message.answer(i)
+        await message.answer(i)
         await sleep(10)
-    message.answer(0)
+    await message.answer(0)
 
 
 @dp.message_handler(commands=['start'])
@@ -57,7 +57,7 @@ async def start(message: types.Message):
             reply += f'We will call you {nickname}.\n'
         sql.execute("INSERT INTO users (id, nickname) " +
                     "VALUES(%s, %s);", (id, nickname))
-        message.answer(reply + f'Hello, {nickname}!')
+        await message.answer(reply + f'Hello, {nickname}!')
     sql.close()
 
 
