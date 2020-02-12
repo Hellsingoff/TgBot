@@ -38,7 +38,7 @@ async def start(message: types.Message):
             message.reply('Error!')
             return
     reply = ''
-    nickname = User.select(nickname).where(User.id == id)
+    nickname = User.select(User.nickname).where(User.id == id)
     if nickname != None:
         await message.answer(f'{nickname}, you are already exist in db!')
     else:
