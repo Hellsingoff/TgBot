@@ -40,7 +40,7 @@ async def start(message: types.Message):
     reply = ''
     user = User.select().where(User.id == id)
     if user.exists():
-        await message.answer(f'{user.nickname}, you are already exist in db!')
+        await message.answer(f'{user.get().nickname}, you are already exist in db!')
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
