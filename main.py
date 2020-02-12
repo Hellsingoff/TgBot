@@ -18,7 +18,7 @@ class User(Model):
                          max_length=16)
     class Meta:
         database = db
-        db_table = users
+        db_table = 'users'
 
 
 @dp.message_handler(commands=['sleep'])
