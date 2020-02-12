@@ -13,7 +13,7 @@ db = connect(getenv('DATABASE_URL'))
 
 
 class User(Model):
-    id = IntegerField(null=False, unique=True)
+    id = IntegerField(null=False, unique=True, primary_key=True)
     nickname = CharField(null=False, unique=True, max_length=16)
     class Meta:
         database = db
@@ -40,7 +40,7 @@ async def start(message: types.Message):
     reply = ''
     nickname = User.get(User.id == id).nickname
     if nickname != None:
-        await message.answer(f'{nickname[0]}, you are already exist in db!')
+        await message.answer(f'{nickname}, you are already exist in db!')
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
