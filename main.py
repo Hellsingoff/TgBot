@@ -72,7 +72,7 @@ async def rename(message: types.Message):
 
 @dp.message_handler(commands=['roll'])
 async def roll(message: types.Message):
-    qubes = {1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅'}
+    qubes = {1: '🎲1', 2: '🎲2', 3: '🎲3', 4: '🎲4', 5: '🎲5', 6: '🎲6'}
     await message.answer(qubes[randint(1, 6)])
 
 
@@ -100,11 +100,8 @@ async def print_db(message: types.Message):
 async def db_remove(message: types.Message):
     try:
         id_list = [int(i) for i in message.text.split()[1:]]
-        await message.answer(id_list) #test
         for id in id_list:
-            await message.answer(id) #test
             user = User.select().where(User.id == id)
-            await message.answer(user) #test
             if user.exists():
                 user.get().delete_instance()
     except:
