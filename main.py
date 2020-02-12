@@ -70,8 +70,8 @@ async def rename(message: types.Message):
     await message.answer('WIP...') # TO DO
 
 
-@dp.message_handler(commands=['random'])
-async def random_num(message: types.Message):
+@dp.message_handler(commands=['roll'])
+async def roll(message: types.Message):
     qubes = {1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅'}
     await message.answer(qubes[randint(1, 6)])
 
@@ -100,13 +100,40 @@ async def print_db(message: types.Message):
 async def db_remove(message: types.Message):
     try:
         id_list = [int(i) for i in message.text.split()[1:]]
+        await message.answer(id_list) #test
         for id in id_list:
+            await message.answer(id) #test
             user = User.select().where(User.id == id)
+            await message.answer(user) #test
             if user.exists():
                 user.delete_instance()
     except:
         await message.answer('Error!')
-    print_db(message)
+    await print_db(message)
+
+'''
+@dp.message_handler(commands=['w'])
+def whisper(message):
+    if len(message.text.split()) < 3:
+        await message.answer('Usage: /w username message')
+        return
+    bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    input_text = message.text.split()[1:]
+    sql = database.cursor()
+    sql.execute("SELECT id FROM users " +
+                "WHERE nickname = %s;", [input_text[0]])
+    target = sql.fetchone()[0]
+    sql.execute("SELECT nickname FROM users " +
+                "WHERE id = %s;", [message.from_user.id])
+    sender = sql.fetchone()[0]
+    text_to_send = sender +': ' + ' '.join(input_text[1:])
+    sql.close()
+    try:
+        bot.send_message(chat_id=target, text=text_to_send)
+        message.reply_text(text_to_send)
+    except:
+        message.reply_text('Error :(\nTarget user stoped the bot?')
+'''
 
 
 @dp.message_handler()
