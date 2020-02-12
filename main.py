@@ -38,10 +38,10 @@ async def start(message: types.Message):
             message.reply('Error!')
             return
     reply = ''
-    nickname = User.get(User.id == id).nickname
-    if nickname != None:
+    try:
+        nickname = User.get(User.id == id).nickname
         await message.answer(f'{nickname}, you are already exist in db!')
-    else:
+    except:
         if len(message.text.split()) > 2: # tmp to test db
             try:
                 nickname = ''.join(message.text.split()[2:])[:16]
