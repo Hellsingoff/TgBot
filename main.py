@@ -34,7 +34,7 @@ async def start(message: types.Message):
     sql.execute("SELECT nickname FROM users WHERE id = %s;", [id])
     nickname = sql.fetchone()
     if nickname != None:
-        message.answer(f'{nickname[0]}, you are already exist in db!')
+        await message.answer(f'{nickname[0]}, you are already exist in db!')
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
@@ -62,7 +62,7 @@ async def start(message: types.Message):
 
 
 @dp.message_handler()
-async def echo(message: types.Message):
+def echo(message: types.Message):
     message.answer(message.text)
 
 
