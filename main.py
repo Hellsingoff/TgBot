@@ -58,7 +58,7 @@ async def start(message: types.Message):
         user = User.select().where(User.nickname == nickname)
         if user.exists():
             reply += f'{nickname}, your name has already been taken.\n'
-            nickname = await nickname_generator(nickname)
+            nickname = nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
         User.create(id=id, nickname=nickname)
         await message.answer(reply + f'Hello, {nickname}!')
