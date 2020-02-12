@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from os import getenv
+from random import randint
 from aiogram import Bot, Dispatcher, executor, types
 from asyncio import sleep
 from peewee import *
@@ -62,6 +63,50 @@ async def start(message: types.Message):
             reply += f'We will call you {nickname}.\n'
         User.create(id=id, nickname=nickname)
         await message.answer(reply + f'Hello, {nickname}!')
+
+
+@dp.message_handler(commands=['rename'])
+async def rename(message: types.Message):
+    await message.answer('WIP...') # TO DO
+
+
+@dp.message_handler(commands=['random'])
+async def random_num(message: types.Message):
+    qubes = {1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅'}
+    await message.answer(qubes[randint(1, 6)])
+
+
+@dp.message_handler(commands=['whoiam'])
+async def whoami(message: types.Message):
+    userinfo = 'id: ' + str(message.from_user.id)
+    if type(message.from_user.username) is str:
+        userinfo += '\n' + 'Nickname: ' + message.from_user.username
+    if type(message.from_user.first_name) is str:
+        userinfo += '\n' + 'F.Name: ' + message.from_user.first_name
+    if type(message.from_user.last_name) is str:
+        userinfo += '\n' + 'L.Name: ' + message.from_user.last_name
+    await message.answer(userinfo)
+
+
+@dp.message_handler(commands=['db'])
+async def print_db(message: types.Message):
+    text = ''
+    for user in User.select():
+        text += str(user.id) + ' ' + user.nickname + '\n'
+    await message.answer(text)
+
+
+@dp.message_handler(commands=['remove'])
+async def db_remove(message: types.Message):
+    try:
+        id_list = [int(i) for i in message.text.split()[1:]]
+        for id in id_list:
+            user = User.select().where(User.id == id)
+            if user.exists():
+                user.delete_instance()
+    except:
+        await message.answer('Error!')
+    print_db(message)
 
 
 @dp.message_handler()
