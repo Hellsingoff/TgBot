@@ -9,7 +9,7 @@ from playhouse.db_url import connect
 load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
-db = connect(os.environ.get('DATABASE_URL'))
+db = connect(getenv('DATABASE_URL'))
 
 
 class Users(Model):
