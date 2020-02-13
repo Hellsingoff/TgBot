@@ -57,6 +57,7 @@ async def sleeping(message: types.Message):
     global msg_by_second
     while True:
         await sleep(1)
+        print(msg_by_second)
         msg_by_second = 0
 
 
