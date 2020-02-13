@@ -78,6 +78,7 @@ async def roll(message: types.Message):
         result = [0, 0, 0, 0, 0, 0]      #roll test
         while counter < int(args[1]):      #roll test
             result[randint(0, 5)] += 1      #roll test
+            counter += 1
         await message.answer(result)      #roll test
     else:      #roll test
         await message.answer('🎲 ' + str(randint(1, 6)))
