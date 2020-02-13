@@ -35,12 +35,16 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
     msg_by_second += 1
     if msg_by_second < 5:
         if msg_by_second == 0:
+            print('0')
             old_time = q.get()
         else:
+            print('<5')
             q.get()
     else:
+        print('else')
         delta_time = q.get() - old_time
         if delta_time < 1:
+            print('sleep')
             await sleep(1 - delta_time)
         msg_by_second = 0
     try:
