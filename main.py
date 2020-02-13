@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from os import getenv
 from random import randint
+from queue import Queue
 from aiogram import Bot, Dispatcher, executor, types
 from asyncio import sleep
 from peewee import *
@@ -11,6 +12,20 @@ load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
 db = connect(getenv('DATABASE_URL'))
+q = Queue()
+
+
+async def check_q():
+    await print(q.get())
+
+
+async def put_q():
+    global q
+    q.put(1)
+    await sleep(1)
+    q.put(2)
+    await sleep(2)
+    q.put(3)
 
 
 class User(Model):
@@ -156,4 +171,6 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
+    check_q()
+    put_q()
     executor.start_polling(dp)
