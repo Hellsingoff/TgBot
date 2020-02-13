@@ -1,4 +1,6 @@
 from random import randint
+from time import time
+from queue import Queue
 from os import getenv
 from dotenv import load_dotenv
 import logging
@@ -14,7 +16,9 @@ dp = Dispatcher(bot)
 db = connect(getenv('DATABASE_URL'))
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
+q = Queue()
 msg_by_second = 0
+old_time = time()
 
 
 class User(Model):
@@ -26,9 +30,19 @@ class User(Model):
 
 
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
-    global msg_by_second
-    while msg_by_second > 25:
-        await sleep(0.01)
+    global msg_by_second, old_time
+    q.put(time())
+    msg_by_second += 1
+    if msg_by_second < 5:
+        if msg_by_second == 0:
+            old_time = q.get()
+        else:
+            q.get()
+    else:
+        delta_time = q.get() - old_time
+        if delta_time < 1:
+            await sleep(1 - delta_time)
+        msg_by_second = 0
     try:
         await bot.send_message(user_id, text, 
                                disable_notification=disable_notif)
@@ -47,15 +61,8 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
-        msg_by_second += 1
-        msg_timer()
         return True
     return False
-
-async def msg_timer():
-    global msg_by_second
-    await sleep(1)
-    msg_by_second -= 1
 
 
 @dp.message_handler(commands=['flood'])
