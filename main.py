@@ -28,7 +28,7 @@ async def check_q(message: types.Message):
     global q
     while True:
         try:
-            message.answer(q.get(False))
+            await message.answer(q.get(False))
         except:
             continue
 
