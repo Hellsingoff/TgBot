@@ -15,12 +15,22 @@ db = connect(getenv('DATABASE_URL'))
 q = Queue()
 
 
+class User(Model):
+    id = IntegerField(null=False, unique=True, primary_key=True)
+    nickname = CharField(null=False, unique=True, max_length=16)
+    class Meta:
+        database = db
+        db_table = 'users'
+
+
+@dp.message_handler(commands=['get'])
 async def check_q():
     global q
     while True:
         await print(q.get(False))
 
 
+@dp.message_handler(commands=['put'])
 async def put_q():
     global q
     q.put(1)
@@ -28,14 +38,6 @@ async def put_q():
     q.put(2)
     await sleep(2)
     q.put(3)
-
-
-class User(Model):
-    id = IntegerField(null=False, unique=True, primary_key=True)
-    nickname = CharField(null=False, unique=True, max_length=16)
-    class Meta:
-        database = db
-        db_table = 'users'
 
 
 @dp.message_handler(commands=['sleep'])
