@@ -28,6 +28,7 @@ class User(Model):
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_by_second
     while msg_by_second > 25:
+        log.error("Too many messages!")
         await sleep(0.01)
     try:
         await bot.send_message(user_id, text, 
