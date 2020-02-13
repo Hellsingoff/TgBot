@@ -48,10 +48,14 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
         msg_by_second += 1
-        await sleep(1)
-        msg_by_second -= 1
+        msg_timer()
         return True
     return False
+
+async def msg_timer():
+    global msg_by_second
+    await sleep(1)
+    msg_by_second -= 1
 
 
 @dp.message_handler(commands=['flood'])
