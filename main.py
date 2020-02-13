@@ -27,7 +27,7 @@ class User(Model):
 async def check_q(message: types.Message):
     global q
     while True:
-        await print(q.get(False))
+        print(q.get(False))
 
 
 @dp.message_handler(commands=['put'])
