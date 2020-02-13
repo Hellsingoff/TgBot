@@ -31,7 +31,7 @@ async def check_q(message: types.Message):
             print(q.get(False))
         except:
             print('error')
-            continue
+            break
 
 
 @dp.message_handler(commands=['put'])
