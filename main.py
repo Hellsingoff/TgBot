@@ -18,7 +18,7 @@ q = Queue()
 async def check_q():
     global q
     while True:
-        await print(q.get())
+        await print(q.get(False))
 
 
 async def put_q():
@@ -174,5 +174,5 @@ def nickname_generator(nickname):
 
 if __name__ == '__main__':
     check_q()
-    await put_q()
+    put_q()
     executor.start_polling(dp)
