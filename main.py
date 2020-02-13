@@ -72,8 +72,15 @@ async def rename(message: types.Message):
 
 @dp.message_handler(commands=['roll'])
 async def roll(message: types.Message):
-    qubes = {1: '🎲1', 2: '🎲2', 3: '🎲3', 4: '🎲4', 5: '🎲5', 6: '🎲6'}
-    await message.answer(qubes[randint(1, 6)])
+    args = message.text.split()      #roll test
+    if len(args) == 2 and args[1].isdigit():      #roll test
+        counter = 0      #roll test
+        result = [0, 0, 0, 0, 0, 0]      #roll test
+        while counter < int(args[1]):      #roll test
+            result[randint(0, 5)] += 1      #roll test
+        await message.answer(result)      #roll test
+    else:      #roll test
+        await message.answer('🎲 ' + str(randint(1, 6)))
 
 
 @dp.message_handler(commands=['whoiam'])
