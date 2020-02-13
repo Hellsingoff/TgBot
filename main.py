@@ -1,8 +1,8 @@
-from dotenv import load_dotenv
-from os import getenv
 from random import randint
-from queue import Queue
-from aiogram import Bot, Dispatcher, executor, types
+from os import getenv
+from dotenv import load_dotenv
+import logging
+from aiogram import Bot, Dispatcher, executor, types, exceptions
 from asyncio import sleep
 from peewee import *
 from playhouse.db_url import connect
@@ -12,7 +12,9 @@ load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
 db = connect(getenv('DATABASE_URL'))
-q = Queue()
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('broadcast')
+msg_by_second = 0
 
 
 class User(Model):
@@ -23,24 +25,43 @@ class User(Model):
         db_table = 'users'
 
 
-@dp.message_handler(commands=['get'])
-async def check_q(message: types.Message):
-    global q
+async def send_message(user_id: int, text: str, notification: bool=False):
+    global msg_by_second
+    while msg_by_second > 25:
+        await sleep(0.01)
+    try:
+        await bot.send_message(user_id, text, 
+                               disable_notification=notification)
+    except exceptions.BotBlocked:
+        log.error(f"Target [ID:{user_id}]: blocked by user")
+    except exceptions.ChatNotFound:
+        log.error(f"Target [ID:{user_id}]: invalid user ID")
+    except exceptions.RetryAfter as e:
+        log.error(f"Target [ID:{user_id}]: Flood limit is exceeded." +
+                                        "Sleep {e.timeout} seconds.")
+        await sleep(e.timeout)
+        return await send_message(user_id, text, notification)
+    except exceptions.UserDeactivated:
+        log.error(f"Target [ID:{user_id}]: user is deactivated")
+    except exceptions.TelegramAPIError:
+        log.exception(f"Target [ID:{user_id}]: failed")
+    else:
+        msg_by_second += 1
+        return True
+    return False
+
+
+@dp.message_handler(commands=['reset'])
+async def sleeping(message: types.Message):
+    global msg_by_second
     while True:
-        try:
-            print(q.get(False))
-        except:
-            continue
+        await sleep(1)
+        msg_by_second = 0
 
 
-@dp.message_handler(commands=['put'])
-async def put_q(message: types.Message):
-    global q
-    q.put('1')
-    await sleep(1)
-    q.put('2')
-    await sleep(2)
-    q.put('3')
+@dp.message_handler(commands=['flood'])
+async def sleeping(message: types.Message):
+    args = message.text.split()
 
 
 @dp.message_handler(commands=['sleep'])
