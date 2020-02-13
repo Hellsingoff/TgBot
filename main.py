@@ -12,7 +12,7 @@ load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
 db = connect(getenv('DATABASE_URL'))
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger('broadcast')
 msg_by_second = 0
 
