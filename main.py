@@ -36,11 +36,11 @@ async def check_q(message: types.Message):
 @dp.message_handler(commands=['put'])
 async def put_q(message: types.Message):
     global q
-    q.put(1)
+    q.put('1')
     await sleep(1)
-    q.put(2)
+    q.put('2')
     await sleep(2)
-    q.put(3)
+    q.put('3')
 
 
 @dp.message_handler(commands=['sleep'])
