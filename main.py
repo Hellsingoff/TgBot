@@ -25,13 +25,13 @@ class User(Model):
         db_table = 'users'
 
 
-async def send_message(user_id: int, text: str, notification: bool=False):
+async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_by_second
     while msg_by_second > 25:
         await sleep(0.01)
     try:
         await bot.send_message(user_id, text, 
-                               disable_notification=notification)
+                               disable_notification=disable_notif)
     except exceptions.BotBlocked:
         log.error(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:
@@ -40,7 +40,7 @@ async def send_message(user_id: int, text: str, notification: bool=False):
         log.error(f"Target [ID:{user_id}]: Flood limit is exceeded." +
                                         "Sleep {e.timeout} seconds.")
         await sleep(e.timeout)
-        return await send_message(user_id, text, notification)
+        return await send_message(user_id, text, disable_notif)
     except exceptions.UserDeactivated:
         log.error(f"Target [ID:{user_id}]: user is deactivated")
     except exceptions.TelegramAPIError:
@@ -62,6 +62,9 @@ async def sleeping(message: types.Message):
 @dp.message_handler(commands=['flood'])
 async def sleeping(message: types.Message):
     args = message.text.split()
+    if len(args) == 2 and args[1].isdigit():
+        for i in range(int(args[1])):
+            await send_message(message.from_user.id, str(i))
 
 
 @dp.message_handler(commands=['sleep'])
@@ -115,16 +118,7 @@ async def rename(message: types.Message):
 
 @dp.message_handler(commands=['roll'])
 async def roll(message: types.Message):
-    args = message.text.split()      #roll test
-    if len(args) == 2 and args[1].isdigit():      #roll test
-        counter = 0      #roll test
-        result = [0, 0, 0, 0, 0, 0]      #roll test
-        while counter < int(args[1]):      #roll test
-            result[randint(0, 5)] += 1      #roll test
-            counter += 1
-        await message.answer(result)      #roll test
-    else:      #roll test
-        await message.answer('🎲 ' + str(randint(1, 6)))
+    await message.answer('🎲 ' + str(randint(1, 6)))
 
 
 @dp.message_handler(commands=['whoiam'])
