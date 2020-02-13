@@ -40,6 +40,7 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
     except exceptions.RetryAfter as e:
         log.error(f"Target [ID:{user_id}]: Flood limit is exceeded." +
                                         "Sleep {e.timeout} seconds.")
+        print('flood error ' + str(e.timeout))
         await sleep(e.timeout)
         return await send_message(user_id, text, disable_notif)
     except exceptions.UserDeactivated:
