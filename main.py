@@ -24,14 +24,14 @@ class User(Model):
 
 
 @dp.message_handler(commands=['get'])
-async def check_q():
+async def check_q(message: types.Message):
     global q
     while True:
         await print(q.get(False))
 
 
 @dp.message_handler(commands=['put'])
-async def put_q():
+async def put_q(message: types.Message):
     global q
     q.put(1)
     await sleep(1)
@@ -175,6 +175,4 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
-    check_q()
-    put_q()
     executor.start_polling(dp)
