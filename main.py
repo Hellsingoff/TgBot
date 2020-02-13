@@ -27,9 +27,9 @@ class User(Model):
 
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_by_second
-    while msg_by_second > 25:
-        print("Too many messages!")
-        await sleep(0.01)
+#    while msg_by_second > 25:
+#        print("Too many messages!")
+#        await sleep(0.01)
     try:
         await bot.send_message(user_id, text, 
                                disable_notification=disable_notif)
@@ -54,7 +54,7 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
 
 
 @dp.message_handler(commands=['reset'])
-async def sleeping(message: types.Message):
+async def reset(message: types.Message):
     global msg_by_second
     while True:
         await sleep(1)
@@ -63,7 +63,7 @@ async def sleeping(message: types.Message):
 
 
 @dp.message_handler(commands=['flood'])
-async def sleeping(message: types.Message):
+async def flood(message: types.Message):
     args = message.text.split()
     if len(args) == 2 and args[1].isdigit():
         for i in range(int(args[1])):
