@@ -12,7 +12,7 @@ load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
 db = connect(getenv('DATABASE_URL'))
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_by_second = 0
 
@@ -27,9 +27,8 @@ class User(Model):
 
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_by_second
-#    while msg_by_second > 25:
-#        print("Too many messages!")
-#        await sleep(0.01)
+    while msg_by_second > 25:
+        await sleep(0.01)
     try:
         await bot.send_message(user_id, text, 
                                disable_notification=disable_notif)
@@ -49,17 +48,10 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
         msg_by_second += 1
+        await sleep(1)
+        msg_by_second -= 1
         return True
     return False
-
-
-@dp.message_handler(commands=['reset'])
-async def reset(message: types.Message):
-    global msg_by_second
-    while True:
-        await sleep(1)
-        print(msg_by_second)
-        msg_by_second = 0
 
 
 @dp.message_handler(commands=['flood'])
