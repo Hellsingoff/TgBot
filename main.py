@@ -34,13 +34,13 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
     q.put(time())
     msg_by_second += 1
     if msg_by_second < 5:
-        print(len(q))
+        print(q.qsize())
         if msg_by_second == 0:
             print('0')
             old_time = q.get()
         else:
             print('<5')
-            q.get()
+            print(q.get())
     else:
         print('else')
         delta_time = q.get() - old_time
