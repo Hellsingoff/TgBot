@@ -42,6 +42,7 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
             else:
                 print('<5')
                 print(q.get())
+                break
         else:
             print('else')
             delta_time = q.get() - old_time
