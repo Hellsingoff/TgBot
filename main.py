@@ -25,14 +25,14 @@ class User(Model):
         database = db
         db_table = 'users'
 
-
+# reset msg_counter every second
 async def msg_counter_reset():
     global msg_counter
     while True:
         await sleep(1)
         msg_counter = 0
 
-
+# safe sending mesage function
 async def send_message(user_id: int, text: str):
     global msg_counter
     while msg_counter > MSG_PER_SECOND:
@@ -49,7 +49,7 @@ async def send_message(user_id: int, text: str):
         log.error(f"Target [ID:{user_id}]: Flood limit is exceeded." +
                                         "Sleep {e.timeout} seconds.")
         await sleep(e.timeout)
-        return await send_message(user_id, text, disable_notif)
+        return await send_message(user_id, text)
     except exceptions.UserDeactivated:
         log.error(f"Target [ID:{user_id}]: user is deactivated")
     except exceptions.MessageIsTooLong:
@@ -58,44 +58,15 @@ async def send_message(user_id: int, text: str):
         while start_char <= len(text):
             await send_message(user_id, text[start_char:start_char + 4096])
             start_char += 4096
+    except exceptions.NetworkError:
+        log.exception(f"Target [ID:{user_id}]: NetworkError")
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
         return True
     return False
 
-
-@dp.message_handler(commands=['flood']) # test sender
-async def flood(message: types.Message):
-    args = message.text.split()
-    if len(args) == 2 and args[1].isdigit():
-        for i in range(int(args[1])):
-            await send_message(message.from_user.id, str(i))
-
-
-@dp.message_handler(commands=['len']) # test sender
-async def flood(message: types.Message):
-    args = message.text.split()
-    if len(args) == 2 and args[1].isdigit():
-        await send_message(message.from_user.id, 'Й' * int(args[1]))
-
-
-@dp.message_handler(commands=['speed']) # test sender
-async def speed(message: types.Message):
-    global MSG_PER_SECOND
-    args = message.text.split()
-    if len(args) == 2 and args[1].isdigit():
-        MSG_PER_SECOND = int(args[1])
-
-
-@dp.message_handler(commands=['sleep']) # TMP TEST
-async def sleeping(message: types.Message):
-    for i in range(30, 0, -10):
-        await message.answer(i)
-        await sleep(10)
-    await message.answer(0)
-
-
+# registration with testing arguments
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     id = message.from_user.id
@@ -132,38 +103,26 @@ async def start(message: types.Message):
         User.create(id=id, nickname=nickname)
         await send_message(message.from_user.id, reply+ f'Hello, {nickname}!')
 
-
+# change nickname in db.  TO DO!!!
 @dp.message_handler(commands=['rename'])
 async def rename(message: types.Message):
-    await message.answer('WIP...') # TO DO
+    await message.answer('WIP...')
 
-
-@dp.message_handler(commands=['roll']) # tmp
+# rework to return
+@dp.message_handler(commands=['roll'])
 async def roll(message: types.Message):
     await message.answer('🎲 ' + str(randint(1, 6)))
 
-
-@dp.message_handler(commands=['whoiam']) # userstat
-async def whoami(message: types.Message):
-    userinfo = 'id: ' + str(message.from_user.id)
-    if type(message.from_user.username) is str:
-        userinfo += '\n' + 'Nickname: ' + message.from_user.username
-    if type(message.from_user.first_name) is str:
-        userinfo += '\n' + 'F.Name: ' + message.from_user.first_name
-    if type(message.from_user.last_name) is str:
-        userinfo += '\n' + 'L.Name: ' + message.from_user.last_name
-    await message.answer(userinfo)
-
-
-@dp.message_handler(commands=['db']) # test
+# test print SQL function
+@dp.message_handler(commands=['db'])
 async def print_db(message: types.Message):
     text = ''
     for user in User.select():
         text += str(user.id) + ' ' + user.nickname + '\n'
     await message.answer(text)
 
-
-@dp.message_handler(commands=['remove']) # test
+# test remove fron db
+@dp.message_handler(commands=['remove'])
 async def db_remove(message: types.Message):
     try:
         id_list = [int(i) for i in message.text.split()[1:]]
@@ -175,34 +134,12 @@ async def db_remove(message: types.Message):
         await message.answer('Error!')
     await print_db(message)
 
-
-@dp.message_handler(commands=['w']) # test, i think
-async def whisper(message: types.Message):
-    if len(message.text.split()) < 3:
-        await message.answer('Usage: /w username message')
-        return
-    await bot.delete_message(chat_id=message.chat.id,
-                             message_id=message.message_id)
-    input_text = message.text.split()[1:]
-    target = User.select().where(User.nickname == input_text[0])
-    if target.exists():
-        target = target.get().id
-        sender = User.get(User.id == message.from_user.id).nickname
-        text_to_send = sender +': ' + ' '.join(input_text[1:])
-        try:
-            await bot.send_message(chat_id=target, text=text_to_send)
-            await message.answer(text_to_send)
-        except:
-            await message.answer('Error :(\nTarget user stoped the bot?')
-    else:
-        await message.answer('User not found.')
-
-
-@dp.message_handler() # test?
+# echo. Test?
+@dp.message_handler()
 async def echo(message: types.Message):
     await message.answer(message.text)
 
-
+# nickname generator
 def nickname_generator(nickname):
     counter = 1
     check_name = User.select().where(User.nickname == nickname + str(counter))
