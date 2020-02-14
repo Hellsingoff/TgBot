@@ -69,6 +69,14 @@ async def flood(message: types.Message):
             await send_message(message.from_user.id, str(i))
 
 
+@dp.message_handler(commands=['speed']) # test sender
+async def speed(message: types.Message):
+    global MSG_PER_SECOND
+    args = message.text.split()
+    if len(args) == 2 and args[1].isdigit():
+        MSG_PER_SECOND = int(args[1])
+
+
 @dp.message_handler(commands=['sleep']) # TMP TEST
 async def sleeping(message: types.Message):
     for i in range(30, 0, -10):
