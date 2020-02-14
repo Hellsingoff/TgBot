@@ -3,11 +3,18 @@ from os import getenv
 from dotenv import load_dotenv
 import logging
 from aiogram import Bot, Dispatcher, executor, types, exceptions
+from aiogram.dispatcher.webhook import SendMessage
+from aiogram.utils.executor import start_webhook
 from asyncio import sleep
 from peewee import *
 from playhouse.db_url import connect
 
 
+WEBHOOK_HOST = 'https://epicspellwars.herokuapp.com'
+WEBHOOK_PATH = '/webhook'
+WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
+WEBAPP_HOST = 'localhost'
+WEBAPP_PORT = 3001
 load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
@@ -24,6 +31,15 @@ class User(Model):
     class Meta:
         database = db
         db_table = 'users'
+
+# run on startup
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+
+# run on shutdown
+async def on_shutdown(dp):
+    logging.warning('Shutting down..')
+    await bot.delete_webhook()
 
 # reset msg_counter every second
 async def msg_counter_reset():
@@ -90,13 +106,13 @@ async def start(message: types.Message):
         elif type(message.from_user.username) is str:
             nickname = message.from_user.username[:16]
         elif type(message.from_user.first_name) is str:
-            nickname = message.from_user.first_name[:16]
+            nickname = message.from_user.first_name.replace(' ', '')[:16]
         elif type(message.from_user.last_name) is str:
-            nickname = message.from_user.last_name[:16]
+            nickname = message.from_user.last_name.replace(' ', '')[:16]
         else:
             nickname = nickname_generator('Player')
         user = User.select().where(User.nickname == nickname)
-        if user.exists():
+        if user.exists() or nickname == '':
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
@@ -106,7 +122,7 @@ async def start(message: types.Message):
 # change nickname in db.  TO DO!!!
 @dp.message_handler(commands=['rename'])
 async def rename(message: types.Message):
-    await message.answer('WIP...')
+    new_name = ''.join(message.text.split()[1:])[:16]
 
 # rework to return
 @dp.message_handler(commands=['roll'])
@@ -154,4 +170,11 @@ def nickname_generator(nickname):
 
 if __name__ == '__main__':
     dp.loop.create_task(msg_counter_reset())
-    executor.start_polling(dp)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=False,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT)
