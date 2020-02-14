@@ -32,9 +32,10 @@ class User(Model):
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_by_second, old_time
     q.put(time())
-    if msg_by_second < 5:
+    msg_by_second += 1
+    while msg_by_second < 6:
         print(q.qsize())
-        if msg_by_second == 0:
+        if msg_by_second == 1:
             print('0')
             old_time = q.get()
         else:
@@ -47,7 +48,7 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
             print('sleep')
             await sleep(1 - delta_time)
         msg_by_second = 0
-    msg_by_second += 1
+    
     try:
         await bot.send_message(user_id, text, 
                                disable_notification=disable_notif)
