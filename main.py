@@ -34,6 +34,7 @@ class User(Model):
 
 # run on startup
 async def on_startup(dp):
+    await send_message(84381379, 'alive')
     await bot.set_webhook(WEBHOOK_URL)
 
 # run on shutdown
@@ -175,6 +176,6 @@ if __name__ == '__main__':
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
         on_shutdown=on_shutdown,
-        skip_updates=True,
+        skip_updates=False,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT)
