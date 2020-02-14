@@ -14,7 +14,7 @@ WEBHOOK_HOST = 'https://epicspellwars.herokuapp.com'
 WEBHOOK_PATH = '/webhook'
 WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 WEBAPP_HOST = 'localhost'
-WEBAPP_PORT = 8443
+WEBAPP_PORT = getenv('PORT') 
 load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
