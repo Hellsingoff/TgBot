@@ -36,6 +36,7 @@ async def msg_counter_reset():
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_counter
     while msg_counter > MSG_PER_SECOND:
+        print('Too many msgs!')
         log.warning('Too many msgs!')
         await sleep(0.1)
     msg_counter += 1
