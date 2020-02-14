@@ -33,14 +33,14 @@ async def msg_counter_reset():
         msg_counter = 0
 
 
-async def send_message(user_id: int, text: str, disable_notif: bool=False):
+async def send_message(user_id: int, text: str):
     global msg_counter
     while msg_counter > MSG_PER_SECOND:
         log.warning('Too many msgs!')
         await sleep(0.1)
     msg_counter += 1
     try:
-        await bot.send_message(user_id, text, disable_notif)
+        await bot.send_message(user_id, text)
     except exceptions.BotBlocked:
         log.error(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:
@@ -54,10 +54,10 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
         log.error(f"Target [ID:{user_id}]: user is deactivated")
     except exceptions.MessageIsTooLong:
         log.error(f"Target [ID:{user_id}]: msg len {len(text)}")
-        first = 0
-        while first <= len(text):
-            await send_message(user_id, text[first:first+4096], disable_notif)
-            first += 4096
+        start_char = 0
+        while start_char <= len(text):
+            await send_message(user_id, text[start_char:start_char + 4096])
+            start_char += 4096
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
