@@ -15,7 +15,7 @@ db = connect(getenv('DATABASE_URL'))
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
-MSG_PER_SECOND = 5
+MSG_PER_SECOND = 25
 
 
 class User(Model):
@@ -36,7 +36,6 @@ async def msg_counter_reset():
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_counter
     while msg_counter > MSG_PER_SECOND:
-        print('Too many msgs!')
         log.warning('Too many msgs!')
         await sleep(0.1)
     msg_counter += 1
@@ -67,6 +66,13 @@ async def flood(message: types.Message):
     if len(args) == 2 and args[1].isdigit():
         for i in range(int(args[1])):
             await send_message(message.from_user.id, str(i))
+
+
+@dp.message_handler(commands=['len']) # test sender
+async def flood(message: types.Message):
+    args = message.text.split()
+    if len(args) == 2 and args[1].isdigit():
+        await send_message(message.from_user.id, 'O' * int(args[1]))
 
 
 @dp.message_handler(commands=['speed']) # test sender
