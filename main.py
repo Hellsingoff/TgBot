@@ -72,7 +72,7 @@ async def flood(message: types.Message):
 async def flood(message: types.Message):
     args = message.text.split()
     if len(args) == 2 and args[1].isdigit():
-        await send_message(message.from_user.id, 'O' * int(args[1]))
+        await send_message(message.from_user.id, 'Й' * int(args[1]))
 
 
 @dp.message_handler(commands=['speed']) # test sender
