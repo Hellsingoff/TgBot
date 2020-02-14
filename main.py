@@ -1,6 +1,4 @@
 from random import randint
-from time import time
-from queue import Queue
 from os import getenv
 from dotenv import load_dotenv
 import logging
@@ -16,9 +14,7 @@ dp = Dispatcher(bot)
 db = connect(getenv('DATABASE_URL'))
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
-q = Queue()
-msg_by_second = 0
-old_time = time()
+msg_counter = 0
 
 
 class User(Model):
@@ -29,28 +25,18 @@ class User(Model):
         db_table = 'users'
 
 
-async def send_message(user_id: int, text: str, disable_notif: bool=False):
-    global msg_by_second, old_time
-    q.put(time())
+async def msg_counter_reset():
+    global msg_counter
     while True:
-        if msg_by_second < 5:
-            print(q.qsize())
-            if msg_by_second == 0:
-                print('0')
-                old_time = q.get()
-                break
-            else:
-                print('<5')
-                print(q.get())
-                break
-        else:
-            print('else')
-            delta_time = q.get() - old_time
-            if delta_time < 1:
-                print('sleep')
-                await sleep(1 - delta_time)
-            msg_by_second = 0
-    msg_by_second += 1
+        await sleep(1)
+        msg_counter = 0
+
+
+async def send_message(user_id: int, text: str, disable_notif: bool=False):
+    global msg_counter
+    while msg_counter > 5:
+        await sleep(0.1)
+    msg_counter += 1
     try:
         await bot.send_message(user_id, text, 
                                disable_notification=disable_notif)
@@ -101,7 +87,8 @@ async def start(message: types.Message):
     reply = ''
     user = User.select().where(User.id == id)
     if user.exists():
-        await message.answer(f'{user.get().nickname}, you are already exist in db!')
+        await message.answer(f'{user.get().nickname}, ' +
+                              'you are already exist in db!')
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
@@ -173,7 +160,8 @@ async def whisper(message: types.Message):
     if len(message.text.split()) < 3:
         await message.answer('Usage: /w username message')
         return
-    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    await bot.delete_message(chat_id=message.chat.id,
+                             message_id=message.message_id)
     input_text = message.text.split()[1:]
     target = User.select().where(User.nickname == input_text[0])
     if target.exists():
@@ -207,4 +195,5 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
+    dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
