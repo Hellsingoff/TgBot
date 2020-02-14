@@ -40,7 +40,7 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
         await sleep(0.1)
     msg_counter += 1
     try:
-        await bot.send_message(user_id, text[:4097], 
+        await bot.send_message(user_id, text[:4096], 
                                disable_notification=disable_notif)
     except exceptions.BotBlocked:
         log.error(f"Target [ID:{user_id}]: blocked by user")
