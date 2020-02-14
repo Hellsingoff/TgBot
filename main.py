@@ -15,7 +15,7 @@ db = connect(getenv('DATABASE_URL'))
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
-MSG_PER_SECOND = 25
+MSG_PER_SECOND = 5
 
 
 class User(Model):
