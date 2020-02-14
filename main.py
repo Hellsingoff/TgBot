@@ -35,8 +35,7 @@ async def msg_counter_reset():
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_counter
     while msg_counter > 5:
-        await bot.send_message(user_id, text, 
-                               disable_notification=disable_notif) #TMP TEST
+        await bot.send_message(user_id, 'overlimit ' + str(msg_counter)) #TMP
         await sleep(0.1)
     msg_counter += 1
     try:
