@@ -169,7 +169,7 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
-    dp.loop.create_task(msg_counter_reset())
+    #dp.loop.create_task(msg_counter_reset())
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
