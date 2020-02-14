@@ -15,6 +15,7 @@ db = connect(getenv('DATABASE_URL'))
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
+MSG_PER_SECOND = 25
 
 
 class User(Model):
@@ -34,8 +35,8 @@ async def msg_counter_reset():
 
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_counter
-    while msg_counter > 5:
-        await bot.send_message(user_id, 'overlimit ' + str(msg_counter)) #TMP
+    while msg_counter > MSG_PER_SECOND:
+        log.warning('Too many msgs!')
         await sleep(0.1)
     msg_counter += 1
     try:
@@ -48,7 +49,6 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
     except exceptions.RetryAfter as e:
         log.error(f"Target [ID:{user_id}]: Flood limit is exceeded." +
                                         "Sleep {e.timeout} seconds.")
-        print('flood error ' + str(e.timeout))
         await sleep(e.timeout)
         return await send_message(user_id, text, disable_notif)
     except exceptions.UserDeactivated:
@@ -60,7 +60,7 @@ async def send_message(user_id: int, text: str, disable_notif: bool=False):
     return False
 
 
-@dp.message_handler(commands=['flood'])
+@dp.message_handler(commands=['flood']) # test sender
 async def flood(message: types.Message):
     args = message.text.split()
     if len(args) == 2 and args[1].isdigit():
@@ -68,7 +68,7 @@ async def flood(message: types.Message):
             await send_message(message.from_user.id, str(i))
 
 
-@dp.message_handler(commands=['sleep'])
+@dp.message_handler(commands=['sleep']) # TMP TEST
 async def sleeping(message: types.Message):
     for i in range(30, 0, -10):
         await message.answer(i)
@@ -83,19 +83,19 @@ async def start(message: types.Message):
         try:
             id = int(message.text.split()[1])
         except:
-            message.reply('Error!')
+            message.answer('Error!')
             return
     reply = ''
     user = User.select().where(User.id == id)
     if user.exists():
-        await message.answer(f'{user.get().nickname}, ' +
-                              'you are already exist in db!')
+        await send_message(message.from_user.id, f'{user.get().nickname}, ' +
+                                             'you are already exist in db!')
     else:
         if len(message.text.split()) > 2: # tmp to test db
             try:
                 nickname = ''.join(message.text.split()[2:])[:16]
             except:
-                nickname = nickname_generator('Player')
+                nickname = nickname_generator('Player') # end test
         elif type(message.from_user.username) is str:
             nickname = message.from_user.username[:16]
         elif type(message.from_user.first_name) is str:
@@ -110,7 +110,7 @@ async def start(message: types.Message):
             nickname = nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
         User.create(id=id, nickname=nickname)
-        await message.answer(reply + f'Hello, {nickname}!')
+        await send_message(message.from_user.id, reply+ f'Hello, {nickname}!')
 
 
 @dp.message_handler(commands=['rename'])
@@ -118,12 +118,12 @@ async def rename(message: types.Message):
     await message.answer('WIP...') # TO DO
 
 
-@dp.message_handler(commands=['roll'])
+@dp.message_handler(commands=['roll']) # tmp
 async def roll(message: types.Message):
     await message.answer('🎲 ' + str(randint(1, 6)))
 
 
-@dp.message_handler(commands=['whoiam'])
+@dp.message_handler(commands=['whoiam']) # userstat
 async def whoami(message: types.Message):
     userinfo = 'id: ' + str(message.from_user.id)
     if type(message.from_user.username) is str:
@@ -135,7 +135,7 @@ async def whoami(message: types.Message):
     await message.answer(userinfo)
 
 
-@dp.message_handler(commands=['db'])
+@dp.message_handler(commands=['db']) # test
 async def print_db(message: types.Message):
     text = ''
     for user in User.select():
@@ -143,7 +143,7 @@ async def print_db(message: types.Message):
     await message.answer(text)
 
 
-@dp.message_handler(commands=['remove'])
+@dp.message_handler(commands=['remove']) # test
 async def db_remove(message: types.Message):
     try:
         id_list = [int(i) for i in message.text.split()[1:]]
@@ -156,7 +156,7 @@ async def db_remove(message: types.Message):
     await print_db(message)
 
 
-@dp.message_handler(commands=['w'])
+@dp.message_handler(commands=['w']) # test, i think
 async def whisper(message: types.Message):
     if len(message.text.split()) < 3:
         await message.answer('Usage: /w username message')
@@ -178,7 +178,7 @@ async def whisper(message: types.Message):
         await message.answer('User not found.')
 
 
-@dp.message_handler()
+@dp.message_handler() # test?
 async def echo(message: types.Message):
     await message.answer(message.text)
 
