@@ -34,9 +34,7 @@ async def msg_counter_reset():
 
 async def send_message(user_id: int, text: str, disable_notif: bool=False):
     global msg_counter
-    while msg_counter > 2:
-        await bot.send_message(user_id, str(msg_counter), 
-                               disable_notification=disable_notif)
+    while msg_counter > 10:
         await sleep(0.1)
     msg_counter += 1
     try:
