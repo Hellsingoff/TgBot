@@ -3,7 +3,7 @@ from os import getenv
 from dotenv import load_dotenv
 import logging
 from aiogram import Bot, Dispatcher, executor, types, exceptions
-from aiogram.dispatcher.webhook import get_new_configured_app, SendMessage
+from aiogram.dispatcher.webhook import get_new_configured_app
 from aiohttp import web
 from asyncio import sleep
 from peewee import *
@@ -50,7 +50,7 @@ async def send_message(user_id: int, text: str):
         await sleep(0.1)
     msg_counter += 1
     try:
-        SendMessage(user_id, text)
+        await bot.send_message(user_id, text)
     except exceptions.BotBlocked:
         log.error(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:
@@ -70,6 +70,8 @@ async def send_message(user_id: int, text: str):
             start_char += 4096
     except exceptions.NetworkError:
         log.exception(f"Target [ID:{user_id}]: NetworkError")
+        await sleep(1)
+        return send_message(user_id, text)
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
@@ -163,7 +165,6 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
-    SendMessage(84381379, 'text')
     app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_PATH)
     app.on_startup.append(on_startup)
     dp.loop.create_task(msg_counter_reset())
