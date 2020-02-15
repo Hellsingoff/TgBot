@@ -34,9 +34,9 @@ class User(Model):
 
 # run on startup
 async def on_startup(dp):
-    log.info('startup')
+    log.warning('startup')
     await bot.set_webhook(WEBHOOK_URL)
-    log.info('end of startup')
+    log.warning('end of startup')
 
 # run on shutdown
 async def on_shutdown(dp):
@@ -171,7 +171,7 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
-    log.info('Main start')
+    log.warning('Main start')
     #dp.loop.create_task(msg_counter_reset())
     start_webhook(
         dispatcher=dp,
@@ -181,4 +181,4 @@ if __name__ == '__main__':
         skip_updates=False,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT)
-    log.info('Main end')
+    log.warning('Main end')
