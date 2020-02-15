@@ -18,6 +18,7 @@ log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
 nickname_regex = re.compile('[^0-9a-zA-Z')
+#а-яА-ЯёЁ!"№;%:\?\*\(\)-\\=_\+@#\$\^&\|/\'<>\[]\{}\.,
 
 
 class User(Model):
@@ -172,5 +173,6 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
+    bot.delete_webhook()
     dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
