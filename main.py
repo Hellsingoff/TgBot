@@ -3,17 +3,15 @@ from os import getenv
 from dotenv import load_dotenv
 import logging
 from aiogram import Bot, Dispatcher, executor, types, exceptions
-from aiogram.dispatcher.webhook import SendMessage
-from aiogram.utils.executor import start_webhook
+from aiogram.dispatcher.webhook import get_new_configured_app, SendMessage
+from aiohttp import web
 from asyncio import sleep
 from peewee import *
 from playhouse.db_url import connect
 
 
-WEBHOOK_HOST = 'https://epicspellwars.herokuapp.com'
 WEBHOOK_PATH = '/webhook'
-WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
-WEBAPP_HOST = 'localhost'
+WEBHOOK_URL = f'https://epicspellwars.herokuapp.com{WEBHOOK_PATH}'
 WEBAPP_PORT = getenv('PORT') 
 load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
@@ -34,16 +32,8 @@ class User(Model):
 
 # run on startup
 async def on_startup(dp):
-    log.warning('startup')
-    print('startup')
-    await bot.set_webhook(WEBHOOK_URL)
-    print('end of startup')
-    log.warning('end of startup')
-
-# run on shutdown
-async def on_shutdown(dp):
-    logging.warning('Shutting down..')
     await bot.delete_webhook()
+    await bot.set_webhook(WEBHOOK_URL)
 
 # reset msg_counter every second
 async def msg_counter_reset():
@@ -173,16 +163,7 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
-    print('Main start')
-    log.warning('Main start')
-    #dp.loop.create_task(msg_counter_reset())
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=False,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT)
-    print('Main end')
-    log.warning('Main end')
+    app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_PATH)
+    app.on_startup.append(on_startup)
+    dp.loop.create_task(msg_counter_reset())
+    web.run_app(app, host='0.0.0.0', port=WEBAPP_PORT)
