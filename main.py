@@ -1,18 +1,14 @@
 from random import randint
+import re
 from os import getenv
 from dotenv import load_dotenv
 import logging
 from aiogram import Bot, Dispatcher, executor, types, exceptions
-from aiogram.dispatcher.webhook import get_new_configured_app
-from aiohttp import web
 from asyncio import sleep
 from peewee import *
 from playhouse.db_url import connect
 
 
-WEBHOOK_PATH = '/webhook'
-WEBHOOK_URL = f'https://epicspellwars.herokuapp.com{WEBHOOK_PATH}'
-WEBAPP_PORT = getenv('PORT') 
 load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
@@ -21,6 +17,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
+nickname_regex = re.compile('[^0-9a-zA-Zа-яА-ЯёЁ!"№;%:\?\*\(\)-\\=_\+@#\$\^&\|/\'<>\[\]\{\}\.,')
 
 
 class User(Model):
@@ -29,11 +26,6 @@ class User(Model):
     class Meta:
         database = db
         db_table = 'users'
-
-# run on startup
-async def on_startup(dp):
-    await bot.delete_webhook()
-    await bot.set_webhook(WEBHOOK_URL)
 
 # reset msg_counter every second
 async def msg_counter_reset():
@@ -52,18 +44,18 @@ async def send_message(user_id: int, text: str):
     try:
         await bot.send_message(user_id, text)
     except exceptions.BotBlocked:
-        log.error(f"Target [ID:{user_id}]: blocked by user")
+        log.exception(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:
-        log.error(f"Target [ID:{user_id}]: invalid user ID")
+        log.exception(f"Target [ID:{user_id}]: invalid user ID")
     except exceptions.RetryAfter as e:
-        log.error(f"Target [ID:{user_id}]: Flood limit is exceeded." +
+        log.exception(f"Target [ID:{user_id}]: Flood limit is exceeded." +
                                         "Sleep {e.timeout} seconds.")
         await sleep(e.timeout)
         return await send_message(user_id, text)
     except exceptions.UserDeactivated:
-        log.error(f"Target [ID:{user_id}]: user is deactivated")
+        log.exception(f"Target [ID:{user_id}]: user is deactivated")
     except exceptions.MessageIsTooLong:
-        log.error(f"Target [ID:{user_id}]: msg len {len(text)}")
+        log.exception(f"Target [ID:{user_id}]: msg len {len(text)}")
         start_char = 0
         while start_char <= len(text):
             await send_message(user_id, text[start_char:start_char + 4096])
@@ -71,7 +63,7 @@ async def send_message(user_id: int, text: str):
     except exceptions.NetworkError:
         log.exception(f"Target [ID:{user_id}]: NetworkError")
         await sleep(1)
-        return send_message(user_id, text)
+        return send_message(user_id, text[:4096])
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
@@ -102,23 +94,38 @@ async def start(message: types.Message):
         elif type(message.from_user.username) is str:
             nickname = message.from_user.username[:16]
         elif type(message.from_user.first_name) is str:
-            nickname = message.from_user.first_name.replace(' ', '')[:16]
+            nickname = message.from_user.first_name[:16]
         elif type(message.from_user.last_name) is str:
-            nickname = message.from_user.last_name.replace(' ', '')[:16]
+            nickname = message.from_user.last_name[:16]
         else:
             nickname = nickname_generator('Player')
+        nickname = nickname_regex.sub('', nickname)
         user = User.select().where(User.nickname == nickname)
-        if user.exists() or nickname == '':
+        if user.exists() or len(nickname) == 0:
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
         User.create(id=id, nickname=nickname)
         await send_message(message.from_user.id, reply+ f'Hello, {nickname}!')
 
-# change nickname in db.  TO DO!!!
+# change nickname in db.
 @dp.message_handler(commands=['rename'])
 async def rename(message: types.Message):
-    new_name = ''.join(message.text.split()[1:])[:16]
+    args = message.text.split()
+    if len(args) < 2:
+        await send_message(message.from_user.id, 'Usage: /rename newname.')
+    else:
+        new_nickname = nickname_regex.sub('', ''.join(args[1:]))[:16]
+        check_name = User.select().where(User.nickname == new_nickname)
+        if check_name.exists():
+            await send_message(message.from_user.id,
+                        f'"{check_name}" is taken or prohibited.')
+        else:
+            row = User.get(User.id == message.from_user.id)
+            row.name = new_nickname
+            row.save()
+            send_message(message.from_user.id, 
+                        f'OK, now we will call you {new_nickname}')
 
 # rework to return
 @dp.message_handler(commands=['roll'])
@@ -165,7 +172,5 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
-    app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_PATH)
-    app.on_startup.append(on_startup)
-    #dp.loop.create_task(msg_counter_reset())
-    web.run_app(app, host='0.0.0.0', port=WEBAPP_PORT)
+    dp.loop.create_task(msg_counter_reset())
+    executor.start_polling(dp)
