@@ -50,7 +50,7 @@ async def send_message(user_id: int, text: str):
         await sleep(0.1)
     msg_counter += 1
     try:
-        await SendMessage(user_id, text)
+        SendMessage(user_id, text)
     except exceptions.BotBlocked:
         log.error(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:
@@ -163,6 +163,7 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
+    SendMessage(84381379, 'text')
     app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_PATH)
     app.on_startup.append(on_startup)
     dp.loop.create_task(msg_counter_reset())
