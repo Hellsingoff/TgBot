@@ -71,7 +71,7 @@ async def send_message(user_id: int, text: str):
     except exceptions.NetworkError:
         log.exception(f"Target [ID:{user_id}]: NetworkError")
         await sleep(1)
-        return send_message(user_id, text[:4096])
+        return send_message(user_id, text)
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
@@ -167,5 +167,5 @@ def nickname_generator(nickname):
 if __name__ == '__main__':
     app = get_new_configured_app(dispatcher=dp, path=WEBHOOK_PATH)
     app.on_startup.append(on_startup)
-    #dp.loop.create_task(msg_counter_reset())
+    dp.loop.create_task(msg_counter_reset())
     web.run_app(app, host='0.0.0.0', port=WEBAPP_PORT)
