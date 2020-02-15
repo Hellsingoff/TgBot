@@ -50,7 +50,7 @@ async def send_message(user_id: int, text: str):
         await sleep(0.1)
     msg_counter += 1
     try:
-        await bot.send_message(user_id, text)
+        await SendMessage(user_id, text)
     except exceptions.BotBlocked:
         log.error(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:
