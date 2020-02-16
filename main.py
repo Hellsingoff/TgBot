@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
-nickname_regex = re.compile('[^0-9a-zA-Z')
+nickname_regex = re.compile('[^0-9a-zA-Z]')
 #а-яА-ЯёЁ!"№;%:\?\*\(\)-\\=_\+@#\$\^&\|/\'<>\[]\{}\.,
 
 
@@ -173,8 +173,5 @@ def nickname_generator(nickname):
 
 
 if __name__ == '__main__':
-    bot.delete_webhook()
-    bot.set_webhook('https://epicspellwars.herokuapp.com/webhook2')
-    bot.delete_webhook()
     dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
