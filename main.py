@@ -130,12 +130,12 @@ async def rename(message: types.Message):
 async def roll(message: types.Message):
     args = message.text.split()
     if len(args) > 1 and args[1].isdigit:
-        text = '🎲 '
+        result = [0, 0, 0, 0, 0, 0]
         args[1] = int(args[1])
         while args[1] > 0:
-            text += str(randint(1, 6)) + ' ' 
+            result[randint(0, 5)] += 1 
             args[1] -= 1
-        await send_message(message.from_user.id, text)
+        await send_message(message.from_user.id, '🎲 '+ str(result))
     else:
         await message.answer('🎲 ' + str(randint(1, 6)))
 
