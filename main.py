@@ -114,9 +114,9 @@ async def rename(message: types.Message):
     else:
         new_nickname = ''.join(args)[:16]
         check_name = User.select().where(User.nickname == new_nickname)
-        if check_name.exists():
+        if check_name.exists() or new_nickname == '':
             await send_message(message.from_user.id,
-                               f'"{check_name.get()}" is taken.')
+                               f'"{new_nickname}" is taken.')
         else:
             row = User.get(User.id == message.from_user.id)
             row.nickname = new_nickname
