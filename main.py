@@ -61,7 +61,7 @@ async def send_message(user_id: int, text: str):
     except exceptions.NetworkError:
         log.exception(f"Target [ID:{user_id}]: NetworkError")
         await sleep(1)
-        return send_message(user_id, text[:4096])
+        return await send_message(user_id, text[:4096])
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{user_id}]: failed")
     else:
@@ -130,10 +130,10 @@ async def rename(message: types.Message):
 async def roll(message: types.Message):
     args = message.text.split()
     if len(args) > 1 and args[1].isdigit:
-        text = ''
+        text = '🎲 '
         args[1] = int(args[1])
         while args[1] > 0:
-            text += '🎲 ' + str(randint(1, 6))
+            text += str(randint(1, 6)) + ' ' 
             args[1] -= 1
         await send_message(message.from_user.id, text)
     else:
