@@ -120,7 +120,7 @@ async def rename(message: types.Message):
         else:
             row = User.get(User.id == message.from_user.id)
             row.name = new_nickname
-            row.save()
+            row.save(force_insert=True)
             await send_message(message.from_user.id, 
                         f'OK, now we will call you {new_nickname}')
 
