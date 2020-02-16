@@ -72,9 +72,10 @@ async def send_message(user_id: int, text: str):
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     id = message.from_user.id
-    if len(message.text.split()) > 2: # tmp to test db
+    text = message.text.split()[1:] # tmp
+    if len(text) > 1: # tmp to test db
         try:
-            id = int(message.text.split()[1])
+            id = int(text[0])
         except:
             message.answer('Error!')
             return
@@ -84,17 +85,17 @@ async def start(message: types.Message):
         await send_message(message.from_user.id, f'{user.get().nickname}, ' +
                                              'you are already exist in db!')
     else:
-        if len(message.text.split()) > 2: # tmp to test db
+        if len(text) > 1: # tmp to test db
             try:
-                nickname = ''.join(message.text.split()[2:])[:16]
+                nickname = ''.join(text[1:])[:16]
             except:
                 nickname = nickname_generator('Player') # end test
-        elif type(message.from_user.username) is str:
-            nickname = message.from_user.username[:16]
-        elif type(message.from_user.first_name) is str:
-            nickname = message.from_user.first_name[:16]
-        elif type(message.from_user.last_name) is str:
-            nickname = message.from_user.last_name[:16]
+        elif type(username := message.from_user.username) is str:
+            nickname = username[:16]
+        elif type(f_name := message.from_user.first_name) is str:
+            nickname = f_name[:16]
+        elif type(l_name := message.from_user.last_name) is str:
+            nickname = l_name[:16]
         else:
             nickname = nickname_generator('Player')
         user = User.select().where(User.nickname == nickname)
@@ -122,12 +123,20 @@ async def rename(message: types.Message):
             row.nickname = new_nickname
             row.save()
             await send_message(message.from_user.id, 
-                        f'OK, now we will call you {new_nickname}')
+                               f'OK, now we will call you {new_nickname}')
 
 # rework to return
 @dp.message_handler(commands=['roll'])
 async def roll(message: types.Message):
-    await message.answer('🎲 ' + str(randint(1, 6)))
+    args = message.text.split()
+    if len(args) > 1 and args[1].isdigit:
+        text = ''
+        while args[1] > 0:
+            text += '🎲 ' + str(randint(1, 6))
+            args[1] -= 1
+        await send_message(message.from_user.id, text)
+    else:
+        await message.answer('🎲 ' + str(randint(1, 6)))
 
 # test print SQL function
 @dp.message_handler(commands=['db'])
@@ -159,13 +168,11 @@ async def echo(message: types.Message):
 # nickname generator
 def nickname_generator(nickname):
     counter = 1
-    check_name = User.select().where(User.nickname == nickname + str(counter))
-    while check_name.exists():
+    while User.select().where(User.nickname == nickname
+                                                + str(counter)).exists():
         counter += 1
         if len(nickname + str(counter)) > 16:
             return nickname_generator('Player')
-        check_name = User.select().where(User.nickname == nickname
-                                                        + str(counter))
     return nickname + str(counter)
 
 
