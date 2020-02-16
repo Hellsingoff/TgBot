@@ -19,7 +19,7 @@ MSG_PER_SECOND = 28
 
 
 class User(Model):
-    id = IntegerField(null=False, unique=True, primary_key=True)
+    id = IntegerField(null=False, unique=True)
     nickname = CharField(null=False, unique=True, max_length=16)
     class Meta:
         database = db
@@ -120,7 +120,7 @@ async def rename(message: types.Message):
         else:
             row = User.get(User.id == message.from_user.id)
             row.name = new_nickname
-            row.save(force_insert=True)
+            row.save()
             await send_message(message.from_user.id, 
                         f'OK, now we will call you {new_nickname}')
 
