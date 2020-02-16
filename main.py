@@ -17,8 +17,8 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
-nickname_regex = re.compile('[^0-9a-zA-Z]')
-#а-яА-ЯёЁ!"№;%:\?\*\(\)-\\=_\+@#\$\^&\|/\'<>\[]\{}\.,
+nickname_regex = re.compile('[^0-9a-zA-Zа-яА-ЯёЁ]')
+#!"№;%:\?\*\(\)-\\=_\+@#\$\^&\|/\'<>\[]\{}\.,
 
 
 class User(Model):
@@ -120,12 +120,12 @@ async def rename(message: types.Message):
         check_name = User.select().where(User.nickname == new_nickname)
         if check_name.exists():
             await send_message(message.from_user.id,
-                        f'"{check_name}" is taken or prohibited.')
+                        f'"{check_name.get()}" is taken or prohibited.')
         else:
             row = User.get(User.id == message.from_user.id)
             row.name = new_nickname
             row.save()
-            send_message(message.from_user.id, 
+            await send_message(message.from_user.id, 
                         f'OK, now we will call you {new_nickname}')
 
 # rework to return
