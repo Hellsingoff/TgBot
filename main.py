@@ -131,6 +131,7 @@ async def roll(message: types.Message):
     args = message.text.split()
     if len(args) > 1 and args[1].isdigit:
         text = ''
+        args[1] = int(args[1])
         while args[1] > 0:
             text += '🎲 ' + str(randint(1, 6))
             args[1] -= 1
