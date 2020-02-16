@@ -112,7 +112,7 @@ async def rename(message: types.Message):
     if len(args) < 1:
         await send_message(message.from_user.id, 'Usage: /rename newname.')
     else:
-        new_nickname = ''.join(args[1:])[:16]
+        new_nickname = ''.join(args)[:16]
         check_name = User.select().where(User.nickname == new_nickname)
         if check_name.exists():
             await send_message(message.from_user.id,
