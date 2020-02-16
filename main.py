@@ -109,7 +109,7 @@ async def start(message: types.Message):
 @dp.message_handler(commands=['rename'])
 async def rename(message: types.Message):
     args = message.text.split()[1:]
-    if len(args) < 2:
+    if len(args) < 1:
         await send_message(message.from_user.id, 'Usage: /rename newname.')
     else:
         new_nickname = ''.join(args[1:])[:16]
