@@ -1,5 +1,4 @@
 from random import randint
-import re
 from os import getenv
 from dotenv import load_dotenv
 import logging
@@ -17,7 +16,6 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
-nickname_regex = re.compile('[^0-9a-zA-Zа-яА-ЯёЁぁ-んァ-ン`~!@"№#%:&-=_/<>]')
 
 
 class User(Model):
@@ -99,9 +97,8 @@ async def start(message: types.Message):
             nickname = message.from_user.last_name[:16]
         else:
             nickname = nickname_generator('Player')
-        nickname = nickname_regex.sub('', nickname)
         user = User.select().where(User.nickname == nickname)
-        if user.exists() or len(nickname) == 0:
+        if user.exists():
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
@@ -111,15 +108,15 @@ async def start(message: types.Message):
 # change nickname in db.
 @dp.message_handler(commands=['rename'])
 async def rename(message: types.Message):
-    args = message.text.split()
+    args = message.text.split()[1:]
     if len(args) < 2:
         await send_message(message.from_user.id, 'Usage: /rename newname.')
     else:
-        new_nickname = nickname_regex.sub('', ''.join(args[1:]))[:16]
+        new_nickname = ''.join(args[1:])[:16]
         check_name = User.select().where(User.nickname == new_nickname)
         if check_name.exists():
             await send_message(message.from_user.id,
-                        f'"{check_name.get()}" is taken or prohibited.')
+                               f'"{check_name.get()}" is taken.')
         else:
             row = User.get(User.id == message.from_user.id)
             row.name = new_nickname
