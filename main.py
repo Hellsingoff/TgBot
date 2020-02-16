@@ -17,9 +17,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
-nickname_regex = re.compile('[^0-9a-zA-Zа-яА-ЯёЁ`~!@"№#\\$;%\\^:\\?&]')
-#\*\(\)-\\=_\+\|/\'<>\[]\{}\.,
-#.*+{}[]|()
+nickname_regex = re.compile('[^0-9a-zA-Zа-яА-ЯёЁ`~!@"№#\\$;%\\^:\\?&\\*\\()-=_\\+\\[]\\{}\\|\\\/\\.,<>]')
 
 
 class User(Model):
