@@ -18,8 +18,7 @@ log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
 nickname_regex = re.compile(
-    '[^0-9a-zA-Zа-яА-ЯёЁぁ-んァ-ン\
-    `~!@"№#\\$;%\\^:\\?&\\()-=_\\+\\[]\\{}\\|\\\/,<>]')
+    '[^0-9a-zA-Zа-яА-ЯёЁぁ-んァ-ン`~!@"№#\\$;%\\^:\\?&\\()-=_\\+\\[]\\|\\\/,<>]')
 
 
 class User(Model):
