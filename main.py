@@ -150,10 +150,11 @@ async def db_remove(message: types.Message):
         await message.answer('Error!')
     await print_db(message)
 
-# echo. Test?
+# echo
 @dp.message_handler()
 async def echo(message: types.Message):
-    await message.answer(message.text)
+    await send_message(message.from_user.id, 
+                       f'{message.text}? What does "{message.text}" mean?')
 
 # nickname generator
 def nickname_generator(nickname):
