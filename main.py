@@ -174,5 +174,7 @@ def nickname_generator(nickname):
 
 if __name__ == '__main__':
     bot.delete_webhook()
+    bot.set_webhook('https://epicspellwars.herokuapp.com/webhook2')
+    bot.delete_webhook()
     dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
