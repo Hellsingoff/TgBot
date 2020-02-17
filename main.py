@@ -165,12 +165,12 @@ async def db_remove(message: types.Message):
 async def echo(message: types.Message):
     await send_message(message.from_user.id, 
                        f'{message.text}? What does "{message.text}" mean?')
-
+'''
 # error handler
 @dp.errors_handler()
 async def error_log(message: types.Message):
     log.error(f'Error handler: {message}')
-
+'''
 # nickname generator
 def nickname_generator(nickname):
     counter = 1
