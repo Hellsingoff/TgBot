@@ -181,7 +181,15 @@ def nickname_generator(nickname):
             return nickname_generator('Player')
     return nickname + str(counter)
 
+# on shutdown
+async def on_shutdown(dispatcher: Dispatcher):
+    log.warning('Shutdown...')
+    await dispatcher.storage.close()
+    await sleep(10)
+    await dispatcher.storage.wait_closed()
+    log.warning('Bye!')
 
 if __name__ == '__main__':
+    log.info('Start.')
     dp.loop.create_task(msg_counter_reset())
-    executor.start_polling(dp)
+    executor.start_polling(dp, on_shutdown=on_shutdown)
