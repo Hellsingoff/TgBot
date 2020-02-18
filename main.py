@@ -43,9 +43,11 @@ async def check_mail():
         pop3server.pass_(password)
         pop3info = pop3server.stat() #access mailbox status
         mailcount = pop3info[0] #toral email
+        text = ''
         for i in range(mailcount):
             for message in pop3server.retr(i+1)[1]:
-                await send_message(84381379, message)
+                text += message + '\n'
+        await send_message(84381379, text)
         pop3server.quit()
         await sleep(30)
 
@@ -194,8 +196,8 @@ async def echo(message: types.Message):
 
 # error handler
 @dp.errors_handler()
-async def error_log(message: types.Message):
-    log.error(f'Error handler: {message}')
+async def error_log(**kwargs):
+    log.error(f'Error handler: {**kwargs}')
 
 # nickname generator
 def nickname_generator(nickname):
