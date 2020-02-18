@@ -196,8 +196,8 @@ async def echo(message: types.Message):
 
 # error handler
 @dp.errors_handler()
-async def error_log(**kwargs):
-    log.error(f'Error handler: {**kwargs}')
+async def error_log(*args):
+    log.error(f'Error handler: {*args}')
 
 # nickname generator
 def nickname_generator(nickname):
