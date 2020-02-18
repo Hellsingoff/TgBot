@@ -3,6 +3,7 @@ from os import getenv
 from dotenv import load_dotenv
 import logging
 import poplib
+import email
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 from asyncio import sleep
 from peewee import *
@@ -46,7 +47,8 @@ async def check_mail():
         text = ''
         for i in range(mailcount):
             for message in pop3server.retr(i+1)[1]:
-                text += message + '\n'
+                msg = email.message_from_string(message)
+                text += msg.get_payload() + '\n'
         await send_message(84381379, text)
         pop3server.quit()
         await sleep(30)
@@ -197,7 +199,7 @@ async def echo(message: types.Message):
 # error handler
 @dp.errors_handler()
 async def error_log(*args):
-    log.error(f'Error handler: {*args}')
+    log.error(f'Error handler: {args}')
 
 # nickname generator
 def nickname_generator(nickname):
