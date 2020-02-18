@@ -42,7 +42,7 @@ async def check_mail():
         pop3server = poplib.POP3_SSL('pop.gmail.com')
         pop3server.user(mailbox)
         pop3server.pass_(password)
-        pop3info = await pop3server.stat()
+        pop3info = pop3server.stat()
         mailcount = pop3info[0]
         text = ''
         for i in range(mailcount):
