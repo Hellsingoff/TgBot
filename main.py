@@ -2,6 +2,7 @@ from random import randint
 from os import getenv
 from dotenv import load_dotenv
 import logging
+import poplib
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 from asyncio import sleep
 from peewee import *
@@ -16,6 +17,9 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
+pop3server = 'pop.gmail.com'
+mailbox = getenv('MAILBOX')
+password = getenv('PASSWORD')
 
 
 class User(Model):
@@ -31,6 +35,20 @@ async def msg_counter_reset():
     while True:
         await sleep(1)
         msg_counter = 0
+
+# check mail
+async def check_mail():
+    while True:
+        pop3server = poplib.POP3_SSL(pop3server) # open connection
+        pop3server.user(mailbox)
+        pop3server.pass_(password)
+        pop3info = pop3server.stat() #access mailbox status
+        mailcount = pop3info[0] #toral email
+        for i in range(mailcount):
+            for message in pop3server.retr(i+1)[1]:
+                await send_message(84381379, message)
+        pop3server.quit()
+        await sleep(30)
 
 # safe sending mesage function
 async def send_message(user_id: int, text: str):
@@ -181,15 +199,7 @@ def nickname_generator(nickname):
             return nickname_generator('Player')
     return nickname + str(counter)
 
-# on shutdown
-async def on_shutdown(dispatcher: Dispatcher):
-    log.warning('Shutdown...')
-    await dispatcher.storage.close()
-    await sleep(10)
-    await dispatcher.storage.wait_closed()
-    log.warning('Bye!')
-
 if __name__ == '__main__':
     log.info('Start.')
-    dp.loop.create_task(msg_counter_reset())
-    executor.start_polling(dp, on_shutdown=on_shutdown)
+    dp.loop.create_task(msg_counter_reset(), check_mail())
+    executor.start_polling(dp)
