@@ -47,7 +47,7 @@ async def check_mail():
         text = ''
         for i in range(mailcount):
             for message in pop3server.retr(i+1)[1]:
-                msg = email.message_from_string(message)
+                msg = email.message_from_bytes(message)
                 text += msg.get_payload() + '\n'
         await send_message(84381379, text)
         pop3server.quit()
