@@ -17,7 +17,6 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 msg_counter = 0
 MSG_PER_SECOND = 28
-pop3server = 'pop.gmail.com'
 mailbox = getenv('MAILBOX')
 password = getenv('PASSWORD')
 
@@ -39,7 +38,7 @@ async def msg_counter_reset():
 # check mail
 async def check_mail():
     while True:
-        pop3server = poplib.POP3_SSL(pop3server) # open connection
+        pop3server = poplib.POP3_SSL('pop.gmail.com') # open connection
         pop3server.user(mailbox)
         pop3server.pass_(password)
         pop3info = pop3server.stat() #access mailbox status
@@ -177,6 +176,15 @@ async def db_remove(message: types.Message):
     except:
         await message.answer('Error!')
     await print_db(message)
+
+# this test ROM function
+@dp.message_handler(commands=['ping'])
+async def ping_me(message: types.Message):
+    args = message.text.split()[1:2]
+    if args[0].isdigit and args[1].isdigit:
+        for i in range(int(args[0])):
+            await send_message(message.from_user.id, int(args[0]) - i)
+            await sleep(int(args[1]))
 
 # echo
 @dp.message_handler()
