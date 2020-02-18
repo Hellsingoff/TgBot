@@ -180,7 +180,7 @@ async def db_remove(message: types.Message):
 # this test ROM function
 @dp.message_handler(commands=['ping'])
 async def ping_me(message: types.Message):
-    args = message.text.split()[1:2]
+    args = message.text.split()[1:3]
     if args[0].isdigit and args[1].isdigit:
         for i in range(int(args[0])):
             await send_message(message.from_user.id, int(args[0]) - i)
