@@ -201,5 +201,6 @@ def nickname_generator(nickname):
 
 if __name__ == '__main__':
     log.info('Start.')
-    dp.loop.create_task(msg_counter_reset(), check_mail())
+    dp.loop.create_task(check_mail())
+    dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
