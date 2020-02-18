@@ -39,17 +39,20 @@ async def msg_counter_reset():
 # check mail
 async def check_mail():
     while True:
-        pop3server = poplib.POP3_SSL('pop.gmail.com') # open connection
+        pop3server = poplib.POP3_SSL('pop.gmail.com')
         pop3server.user(mailbox)
         pop3server.pass_(password)
-        pop3info = pop3server.stat() #access mailbox status
-        mailcount = pop3info[0] #toral email
+        pop3info = await pop3server.stat()
+        mailcount = pop3info[0]
         text = ''
         for i in range(mailcount):
             for message in pop3server.retr(i+1)[1]:
                 msg = email.message_from_bytes(message)
                 text += msg.get_payload() + '\n'
-        await send_message(84381379, text)
+        if text.find('DATABASE_URL on epicspellwars requires maintenance')>-1:
+            await send_message(84381379, 'Maintenance!')
+        elif text != '':
+            await send_message(84381379, 'Email!')
         pop3server.quit()
         await sleep(30)
 
