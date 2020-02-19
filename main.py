@@ -50,14 +50,11 @@ async def check_mail():
                 msg = email.message_from_bytes(message)
                 text += msg.get_payload() + '\n'
         if text.find('DATABASE_URL on epicspellwars requires maintenance')>-1:
-            await send_message(84381379, 'Maintenance!')
+            log.warning('Maintenance!')
+            await send_message(84381379, 'Maintenance!') # tmp 4 test
             dp.stop_polling()
-            await sleep(60)
-            dp.start_polling()
-        elif text != '':
-            await send_message(84381379, 'Email!')
         pop3server.quit()
-        await sleep(30)
+        await sleep(60)
 
 # safe sending mesage function
 async def send_message(user_id: int, text: str):
@@ -196,6 +193,12 @@ async def ping_me(message: types.Message):
             await send_message(message.from_user.id, int(args[0]) - i)
             await sleep(int(args[1]))
 
+# test
+@dp.message_handler(lambda message: User.get(
+                        User.id == message.from_user.id).nickname == 'Tomato')
+async def echo(message: types.Message):
+    await send_message(message.from_user.id, 'TOMATO!')
+
 # echo
 @dp.message_handler()
 async def echo(message: types.Message):
@@ -219,6 +222,7 @@ def nickname_generator(nickname):
 
 if __name__ == '__main__':
     log.info('Start.')
+    send_message(84381379, 'It\'s alive!') # tmp 4 test
     dp.loop.create_task(check_mail())
     dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
