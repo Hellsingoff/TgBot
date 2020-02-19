@@ -51,9 +51,9 @@ async def check_mail():
                 text += msg.get_payload() + '\n'
         if text.find('DATABASE_URL on epicspellwars requires maintenance')>-1:
             await send_message(84381379, 'Maintenance!')
-            await dp.stop_polling()
+            dp.stop_polling()
             await sleep(60)
-            await dp.start_polling()
+            dp.start_polling()
         elif text != '':
             await send_message(84381379, 'Email!')
         pop3server.quit()
