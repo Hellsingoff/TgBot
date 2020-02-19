@@ -38,6 +38,7 @@ async def msg_counter_reset():
 
 # check mail
 async def check_mail():
+    await send_message(84381379, 'It\'s alive!') # tmp 4 test
     while True:
         pop3server = poplib.POP3_SSL('pop.gmail.com')
         pop3server.user(mailbox)
@@ -222,7 +223,6 @@ def nickname_generator(nickname):
 
 if __name__ == '__main__':
     log.info('Start.')
-    send_message(84381379, 'It\'s alive!') # tmp 4 test
     dp.loop.create_task(check_mail())
     dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
