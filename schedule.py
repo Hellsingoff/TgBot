@@ -5,6 +5,7 @@ import logging
 
 from asyncio import sleep
 from aiogram import exceptions
+from main import bot
 
 
 logging.basicConfig(level=logging.INFO)
