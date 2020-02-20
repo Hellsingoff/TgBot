@@ -2,64 +2,18 @@ from random import randint
 from os import getenv
 from dotenv import load_dotenv
 import logging
-import poplib
-import email
 
 from aiogram import Bot, Dispatcher, executor, types, exceptions
-from asyncio import sleep
-from peewee import *
-from playhouse.db_url import connect
 
 from sql import User
 from schedule import *
 
 
-load_dotenv()
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
-db = connect(getenv('DATABASE_URL'))
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
-msg_counter = 0
-MSG_PER_SECOND = 28
-mailbox = getenv('MAILBOX')
-password = getenv('PASSWORD')
 
-# safe sending mesage function
-async def send_message(user_id: int, text: str):
-    global msg_counter
-    while msg_counter > MSG_PER_SECOND:
-        log.warning('Too many msgs!')
-        await sleep(0.1)
-    msg_counter += 1
-    try:
-        await bot.send_message(user_id, text)
-    except exceptions.BotBlocked:
-        log.exception(f"Target [ID:{user_id}]: blocked by user")
-    except exceptions.ChatNotFound:
-        log.exception(f"Target [ID:{user_id}]: invalid user ID")
-    except exceptions.RetryAfter as e:
-        log.exception(f"Target [ID:{user_id}]: Flood limit is exceeded." +
-                                        "Sleep {e.timeout} seconds.")
-        await sleep(e.timeout)
-        return await send_message(user_id, text)
-    except exceptions.UserDeactivated:
-        log.exception(f"Target [ID:{user_id}]: user is deactivated")
-    except exceptions.MessageIsTooLong:
-        log.exception(f"Target [ID:{user_id}]: msg len {len(text)}")
-        start_char = 0
-        while start_char <= len(text):
-            await send_message(user_id, text[start_char:start_char + 4096])
-            start_char += 4096
-    except exceptions.NetworkError:
-        log.exception(f"Target [ID:{user_id}]: NetworkError")
-        await sleep(1)
-        return await send_message(user_id, text[:4096])
-    except exceptions.TelegramAPIError:
-        log.exception(f"Target [ID:{user_id}]: failed")
-    else:
-        return True
-    return False
 
 # registration with testing arguments
 @dp.message_handler(commands=['start'])
@@ -191,6 +145,7 @@ def nickname_generator(nickname):
 
 if __name__ == '__main__':
     log.info('Start.')
-    dp.loop.create_task(check_mail())
+    load_dotenv()
+    dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
