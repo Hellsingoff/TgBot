@@ -2,11 +2,13 @@ from random import randint
 from os import getenv
 from dotenv import load_dotenv
 import logging
+import signal
 
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 
 from sql import User
 from schedule import *
+from logic import nickname_generator
 
 
 bot = Bot(token=getenv('TG_TOKEN'))
@@ -133,19 +135,20 @@ async def echo(message: types.Message):
 async def error_log(*args):
     log.error(f'Error handler: {args}')
 
-# nickname generator
-def nickname_generator(nickname):
-    counter = 1
-    while User.select().where(User.nickname == nickname
-                                                + str(counter)).exists():
-        counter += 1
-        if len(nickname + str(counter)) > 16:
-            return nickname_generator('Player')
-    return nickname + str(counter)
+
+# on shutdown
+async def shutdown():
+    log.warning('Reboot!')
+    await send_message(84381379, 'Reboot!') # tmp 4 test
+    dp.stop_polling()
+    await sleep(15)
+    exit
+
 
 if __name__ == '__main__':
     log.info('Start.')
     load_dotenv()
     dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
+    dp.loop.add_signal_handler(signal.SIGTERM, shutdown)
     executor.start_polling(dp)
