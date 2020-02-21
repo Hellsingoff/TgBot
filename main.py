@@ -151,7 +151,7 @@ if __name__ == '__main__':
     load_dotenv()
     dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
-    executor.start_polling(dp)
     loop = asyncio.get_event_loop()
     loop.add_signal_handler(signal.SIGTERM, shutdown)
     loop.run_forever()
+    executor.start_polling(dp)
