@@ -3,6 +3,7 @@ from os import getenv
 from dotenv import load_dotenv
 import logging
 import signal
+import asyncio
 
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 
@@ -150,5 +151,7 @@ if __name__ == '__main__':
     load_dotenv()
     dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
-    dp.loop.add_signal_handler(signal.SIGTERM, shutdown)
     executor.start_polling(dp)
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGTERM, shutdown)
+    loop.run_forever()
