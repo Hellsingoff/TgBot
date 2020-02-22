@@ -137,7 +137,7 @@ async def ping_me(message: types.Message):
 async def new_door(message: types.Message):
     args = message.text.split()[1:]
     password = None
-    if (len_args := len(args)) < 2 and not args[0].isdigit():
+    if (len_args := len(args)) < 2 or not args[0].isdigit():
         await send_message(message.from_user.id, 
                           'Usage: /create maxplayers name password(optional)')
         return
