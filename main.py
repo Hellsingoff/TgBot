@@ -138,12 +138,15 @@ async def error_log(*args):
 
 
 # on shutdown
-async def shutdown():
-    log.warning('Reboot!')
-    await send_message(84381379, 'Reboot!') # tmp 4 test
-    dp.stop_polling()
-    await sleep(15)
-    exit
+async def on_shutdown():
+    try:
+        await sleep()
+    except asyncio.CancelledError:
+        log.warning('Reboot!')
+        await send_message(84381379, 'Reboot!') # tmp 4 test
+        dp.stop_polling()
+        await sleep(15)
+        exit
 
 
 if __name__ == '__main__':
@@ -151,9 +154,11 @@ if __name__ == '__main__':
     load_dotenv()
     dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
-    '''
     loop = asyncio.get_event_loop()
-    loop.add_signal_handler(signal.SIGTERM, shutdown)
-    loop.run_forever()
-    '''
+    waiting_sigterm = asyncio.ensure_future(on_shutdown())
+    loop.add_signal_handler(signal.SIGTERM, waiting_sigterm.cancel)
+    try:
+        loop.run_until_complete(waiting_sigterm)
+    finally:
+        loop.close()
     executor.start_polling(dp)
