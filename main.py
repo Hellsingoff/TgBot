@@ -140,7 +140,8 @@ async def error_log(*args):
 # on shutdown
 async def on_shutdown():
     try:
-        await sleep()
+        while True:
+            await sleep(120)
     except asyncio.CancelledError:
         log.warning('Reboot!')
         await send_message(84381379, 'Reboot!') # tmp 4 test
