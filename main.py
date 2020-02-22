@@ -150,11 +150,11 @@ async def new_door(message: types.Message):
     if len_args < 2:
         password = args[2]
     else:
-        if Door.select().where(Door.name == args[1]).exists():
+        if Door.select().where(Door.id == args[1]).exists():
             await send_message(message.from_user.id, 
                               'Door name has already been taken.')
         else:
-            Door.create(max_players=int(args[0]), name=args[1], 
+            Door.create(max_players=int(args[0]), id=args[1], 
                         password=password, players=0)
         
 # test

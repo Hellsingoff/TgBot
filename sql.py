@@ -15,7 +15,7 @@ class User(Model):
 
 
 class Door(Model):
-    name = CharField(null=False, unique=True, max_length=16)
+    id = CharField(null=False, unique=True, max_length=16)
     players = SmallIntegerField(null=False, default=0)
     max_players = SmallIntegerField(null=False)
     password = CharField(max_length=16)
