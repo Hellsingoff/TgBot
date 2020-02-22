@@ -155,6 +155,7 @@ if __name__ == '__main__':
     load_dotenv()
     dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
+    '''
     loop = asyncio.get_event_loop()
     waiting_sigterm = asyncio.ensure_future(on_shutdown())
     loop.add_signal_handler(signal.SIGTERM, waiting_sigterm.cancel)
@@ -162,4 +163,5 @@ if __name__ == '__main__':
         loop.run_until_complete(waiting_sigterm)
     finally:
         loop.close()
+    '''
     executor.start_polling(dp)
