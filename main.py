@@ -91,7 +91,7 @@ async def roll(message: types.Message):
 
 # test print users function
 @dp.message_handler(commands=['users'])
-async def print_db(message: types.Message):
+async def print_users(message: types.Message):
     text = ''
     for user in User.select():
         text += str(user.id) + ' ' + user.nickname + '\n'
@@ -99,14 +99,15 @@ async def print_db(message: types.Message):
 
 # test print doors function
 @dp.message_handler(commands=['doors'])
-async def print_db(message: types.Message):
+async def print_doors(message: types.Message):
     text = ''
     for door in Door.select():
-        text += str(door.name) + ' ' + door.players + '/' + door.max_players
+        text += door.name + ' ' + str(door.players) + '/' + \
+                    str(door.max_players) + ' pass: '
         if door.password != None:
-            text += ' pass: yes\n'
+            text += 'yes\n'
         else:
-            text += ' pass: no\n'
+            text += 'no\n'
     await message.answer(text)
 
 # test remove fron db
