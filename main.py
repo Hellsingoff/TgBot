@@ -7,7 +7,7 @@ import asyncio
 
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 
-from sql import User
+from sql import User, Door
 from schedule import *
 from logic import nickname_generator
 
@@ -67,7 +67,7 @@ async def rename(message: types.Message):
         check_name = User.select().where(User.nickname == new_nickname)
         if check_name.exists() or new_nickname == '':
             await send_message(message.from_user.id,
-                               f'"{new_nickname}" is taken.')
+                               f'"{new_nickname}" has already been taken.')
         else:
             row = User.get(User.id == message.from_user.id)
             row.nickname = new_nickname
@@ -89,12 +89,24 @@ async def roll(message: types.Message):
     else:
         await message.answer('🎲 ' + str(randint(1, 6)))
 
-# test print SQL function
-@dp.message_handler(commands=['db'])
+# test print users function
+@dp.message_handler(commands=['users'])
 async def print_db(message: types.Message):
     text = ''
     for user in User.select():
         text += str(user.id) + ' ' + user.nickname + '\n'
+    await message.answer(text)
+
+# test print doors function
+@dp.message_handler(commands=['doors'])
+async def print_db(message: types.Message):
+    text = ''
+    for door in Door.select():
+        text += str(door.name) + ' ' + door.players + '/' + door.max_players
+        if door.password != None:
+            text += ' pass: yes\n'
+        else:
+            text += ' pass: no\n'
     await message.answer(text)
 
 # test remove fron db
@@ -110,7 +122,7 @@ async def db_remove(message: types.Message):
         await message.answer('Error!')
     await print_db(message)
 
-# this test ROM function
+# this is test ROM function
 @dp.message_handler(commands=['ping'])
 async def ping_me(message: types.Message):
     args = message.text.split()[1:3]
@@ -119,6 +131,31 @@ async def ping_me(message: types.Message):
             await send_message(message.from_user.id, int(args[0]) - i)
             await sleep(int(args[1]))
 
+# create new door
+@dp.message_handler(commands=['create'])
+async def new_door(message: types.Message):
+    args = message.text.split()[1:]
+    password = None
+    if (len_args := len(args)) < 2 and not args[0].isdigit():
+        await send_message(message.from_user.id, 
+                          'Usage: /create maxplayers name password(optional)')
+        return
+    elif int(args[0]) < 2 and len(args[1]) > 16 and len(args[2]) > 16:
+        await send_message(message.from_user.id, 
+                    '''Error!
+                    Max players must be more than 1.
+                    Name and password must be no more than 16 characters.''')
+        return
+    if len_args < 2:
+        password = args[2]
+    else:
+        if Door.select().where(Door.name == args[1]).exists():
+            await send_message(message.from_user.id, 
+                              'Door name has already been taken.')
+        else:
+            Door.create(max_players=int(args[0]), name=args[1], 
+                        password=password, players=0)
+        
 # test
 @dp.message_handler(lambda message: User.get(
                         User.id == message.from_user.id).nickname == 'Tomato')

@@ -12,3 +12,13 @@ class User(Model):
     class Meta:
         database = db
         db_table = 'users'
+
+
+class Door(Model):
+    name = CharField(null=False, unique=True, max_length=16)
+    players = SmallIntegerField(null=False, default=0)
+    max_players = SmallIntegerField(null=False)
+    password = CharField(max_length=16)
+    class Meta:
+        database = db
+        db_table = 'doors'
