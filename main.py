@@ -147,11 +147,11 @@ async def new_door(message: types.Message):
                     Max players must be more than 1.
                     Name and password must be no more than 16 characters.''')
         return
-    if len_args < 2:
+    if len_args > 2:
         password = args[2]
     if Door.select().where(Door.id == args[1]).exists():
         await send_message(message.from_user.id, 
-                          'Door name has already been taken.')
+                          'Door\'s name has already been taken.')
     else:
         Door.create(max_players=int(args[0]), id=args[1], 
                     password=password, players=0)
