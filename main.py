@@ -137,25 +137,29 @@ async def ping_me(message: types.Message):
 @dp.message_handler(commands=['create'])
 async def new_door(message: types.Message):
     args = message.text.split()[1:]
-    password = None
+    key = None
     if (len_args := len(args)) < 2 or not args[0].isdigit():
         await send_message(message.from_user.id, 
                           'Usage: /create maxplayers name password(optional)')
         return
     elif int(args[0]) < 2 or len(args[1]) > 16 or len(args[2]) > 16:
-        await send_message(message.from_user.id, 
-                    '''Error!
-                    Max players must be more than 1.
-                    Name and password must be no more than 16 characters.''')
+        await send_message(message.from_user.id, 'Error!\nMax players must ' +
+                                    'be more than 1.\nName and password ' + 
+                                    'must be no more than 16 characters.')
         return
     if len_args > 2:
-        password = args[2]
+        key = args[2]
     if Door.select().where(Door.id == args[1]).exists():
         await send_message(message.from_user.id, 
                           'Door\'s name has already been taken.')
     else:
         Door.create(max_players=int(args[0]), id=args[1], 
-                    password=password, players=0)
+                    key=key, players=1, player_list=[message.from_user.id])
+        text = f'/open {args[1]}'
+        if key != None:
+            text += f' {key}'
+        text += '\nEntrance to this room.'
+        await send_message(message.from_user.id, text)
         
 # test
 @dp.message_handler(lambda message: User.get(
