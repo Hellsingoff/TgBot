@@ -105,7 +105,7 @@ async def print_doors(message: types.Message):
     for door in Door.select():
         text += f'`{door.id:16} {str(door.players)}/{str(door.max_players)}'+\
                                                                     ' pass: '
-        if door.password != None:
+        if door.key != None:
             text += 'yes`\n'
         else:
             text += ' no`\n'
