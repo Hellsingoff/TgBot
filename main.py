@@ -94,7 +94,7 @@ async def roll(message: types.Message):
 async def print_users(message: types.Message):
     text = ''
     for user in User.select():
-        text += f'{str(user.id):12} {user.nickname:_16}\n'
+        text += f'{str(user.id):12} {user.nickname:16}\n'
     await message.answer(text)
 
 # test print doors function
@@ -102,8 +102,8 @@ async def print_users(message: types.Message):
 async def print_doors(message: types.Message):
     text = ''
     for door in Door.select():
-        text += f'{door.id:16} {str(door.players)}/{str(door.max_players)}\
-                                                                     pass: '
+        text += f'{door.id:16} {str(door.players)}/{str(door.max_players)}' +\
+                                                                    ' pass: '
         if door.password != None:
             text += 'yes\n'
         else:
