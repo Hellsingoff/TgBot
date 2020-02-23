@@ -121,7 +121,7 @@ async def db_remove(message: types.Message):
                 user.get().delete_instance()
     except:
         await message.answer('Error!')
-    await print_db(message)
+    await print_users(message)
 
 # this is test ROM function
 @dp.message_handler(commands=['ping'])
@@ -149,13 +149,12 @@ async def new_door(message: types.Message):
         return
     if len_args < 2:
         password = args[2]
+    if Door.select().where(Door.id == args[1]).exists():
+        await send_message(message.from_user.id, 
+                          'Door name has already been taken.')
     else:
-        if Door.select().where(Door.id == args[1]).exists():
-            await send_message(message.from_user.id, 
-                              'Door name has already been taken.')
-        else:
-            Door.create(max_players=int(args[0]), id=args[1], 
-                        password=password, players=0)
+        Door.create(max_players=int(args[0]), id=args[1], 
+                    password=password, players=0)
         
 # test
 @dp.message_handler(lambda message: User.get(
