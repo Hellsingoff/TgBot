@@ -6,6 +6,7 @@ import signal
 import asyncio
 
 from aiogram import Bot, Dispatcher, executor, types, exceptions
+from aiogram.types import ParseMode
 
 from sql import User, Door
 from schedule import *
@@ -95,7 +96,7 @@ async def print_users(message: types.Message):
     text = ''
     for user in User.select():
         text += f'`{str(user.id):12} {user.nickname:16}`\n'
-    await message.answer(text)
+    await message.answer(text, parse_mode=ParseMode.MARKDOWN)
 
 # test print doors function
 @dp.message_handler(commands=['doors'])
@@ -108,7 +109,7 @@ async def print_doors(message: types.Message):
             text += 'yes`\n'
         else:
             text += ' no`\n'
-    await message.answer(text)
+    await message.answer(text, parse_mode=ParseMode.MARKDOWN)
 
 # test remove fron db
 @dp.message_handler(commands=['remove'])
