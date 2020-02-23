@@ -103,7 +103,7 @@ async def print_doors(message: types.Message):
     text = ''
     for door in Door.select():
         text += door.id + ' ' + str(door.players) + '/' + \
-                    str(door.max_players) + ' pass: '
+                    str(door.max_players) + ' pass: ' + str(door.password)
         if door.password != None:
             text += 'yes\n'
         else:
