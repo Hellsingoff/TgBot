@@ -85,16 +85,16 @@ async def roll(message: types.Message):
         while args[1] > 0:
             result[randint(0, 5)] += 1 
             args[1] -= 1
-        await send_message(message.from_user.id, '🎲 '+ str(result))
+        await send_message(message.from_user.id, f'🎲 {str(result)}')
     else:
-        await message.answer('🎲 ' + str(randint(1, 6)))
+        await message.answer(f'🎲 {str(randint(1, 6))}')
 
 # test print users function
 @dp.message_handler(commands=['users'])
 async def print_users(message: types.Message):
     text = ''
     for user in User.select():
-        text += str(user.id) + ' ' + user.nickname + '\n'
+        text += f'{str(user.id):12} {user.nickname:_16}\n'
     await message.answer(text)
 
 # test print doors function
@@ -102,12 +102,12 @@ async def print_users(message: types.Message):
 async def print_doors(message: types.Message):
     text = ''
     for door in Door.select():
-        text += door.id + ' ' + str(door.players) + '/' + \
-                    str(door.max_players) + ' pass: ' + str(door.password)
+        text += f'{door.id:16} {str(door.players)}/{str(door.max_players)}\
+                                                                     pass: '
         if door.password != None:
             text += 'yes\n'
         else:
-            text += 'no\n'
+            text += ' no\n'
     await message.answer(text)
 
 # test remove fron db
@@ -141,7 +141,7 @@ async def new_door(message: types.Message):
         await send_message(message.from_user.id, 
                           'Usage: /create maxplayers name password(optional)')
         return
-    elif int(args[0]) < 2 and len(args[1]) > 16 and len(args[2]) > 16:
+    elif int(args[0]) < 2 or len(args[1]) > 16 or len(args[2]) > 16:
         await send_message(message.from_user.id, 
                     '''Error!
                     Max players must be more than 1.
