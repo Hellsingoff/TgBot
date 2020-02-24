@@ -2,6 +2,7 @@ from peewee import *
 from playhouse.db_url import connect
 from playhouse.postgres_ext import ArrayField
 from os import getenv
+from schedule import send_message
 
 
 db = connect(getenv('DATABASE_URL'))
@@ -24,3 +25,21 @@ class Door(Model):
     class Meta:
         database = db
         db_table = 'doors'
+    
+    async def entry(self, id, key=None):
+        if self.players == self.max_players:
+            await send_message(id, 'It\'s full.')
+        elif id in self.player_list:
+            await send_message(id, 'You are already in this room!')
+        elif key != self.key:
+            await send_message(id, 'The key did not fit.')
+        else:
+            self.players += 1
+            self.player_list.append(id)
+            player = User.get(User.id == id).nickname
+            self.say(f'{player} joined the game. ' + 
+                     f'{self.players}/{self.max_players}')
+    
+    async def say(self, text):
+        for player in self.player_list:
+            await send_message(player, text)

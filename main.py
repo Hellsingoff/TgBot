@@ -161,6 +161,23 @@ async def new_door(message: types.Message):
             text += f' {key}'
         text += '\nEntrance to this room.'
         await send_message(message.from_user.id, text)
+
+# entr in door
+@dp.message_handler(commands=['open'])
+async def door_open(message: types.Message):
+    args = message.text.splitlines()[0].split()[1:]
+    if len(args) == 0:
+        await send_message(message.from_user.id,
+                                        'Usage: /open gamename password.')
+        return
+    if not Door.select().where(Door.id == args[0]).exists:
+        await send_message(message.from_user.id, 'The door does not exist.')
+    else:
+        if len(args) == 1:
+            Door.get(Door.id == args[0]).entry(message.from_user.id)
+        else:
+            Door.get(Door.id == args[0]).entry(message.from_user.id, args[1])
+        
         
 # test
 @dp.message_handler(lambda message: User.get(
