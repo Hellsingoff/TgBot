@@ -8,7 +8,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 from aiogram.types import ParseMode
 
-from sql import User, Door
+from sql import *
 from schedule import *
 from logic import nickname_generator
 
