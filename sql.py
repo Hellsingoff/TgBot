@@ -38,8 +38,8 @@ class Door(Model):
             self.player_list.append(id)
             self.save()
             player = User.get(User.id == id).nickname
-            self.say(f'{player} joined the game. ' + 
-                     f'{self.players}/{self.max_players}')
+            await self.say(f'{player} joined the game. ' + 
+                           f'{self.players}/{self.max_players}')
     
     async def say(self, text):
         for player in self.player_list:
