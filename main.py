@@ -168,7 +168,7 @@ async def door_open(message: types.Message):
     if len(args) == 0:
         await send_message(message.from_user.id,
                                         'Usage: /open gamename password.')
-    elif not sql.Door.select().where(sql.Door.id == args[0]).exists:
+    elif not sql.Door.select().where(sql.Door.id == args[0]).exists():
         await send_message(message.from_user.id, 'The door does not exist.')
     else:
         if len(args) == 1:
