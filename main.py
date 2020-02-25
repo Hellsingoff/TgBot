@@ -8,7 +8,7 @@ from asyncio import sleep, CancelledError
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 from aiogram.types import ParseMode
 
-from sql import User, Door
+import sql
 from schedule import send_message, check_mail, msg_counter_reset
 from logic import nickname_generator
 
@@ -31,7 +31,7 @@ async def start(message: types.Message):
             message.answer('Error!')
             return
     reply = ''
-    user = User.select().where(User.id == id)
+    user = sql.User.select().where(sql.User.id == id)
     if user.exists():
         await send_message(message.from_user.id, f'{user.get().nickname}, ' +
                                              'you are already exist in db!')
@@ -49,12 +49,12 @@ async def start(message: types.Message):
             nickname = l_name[:16]
         else:
             nickname = nickname_generator('Player')
-        user = User.select().where(User.nickname == nickname)
+        user = sql.User.select().where(sql.User.nickname == nickname)
         if user.exists():
             reply += f'{nickname}, your name has already been taken.\n'
             nickname = nickname_generator(nickname)
             reply += f'We will call you {nickname}.\n'
-        User.create(id=id, nickname=nickname)
+        sql.User.create(id=id, nickname=nickname)
         await send_message(message.from_user.id, reply+ f'Hello, {nickname}!')
 
 # change nickname in db.
@@ -65,12 +65,12 @@ async def rename(message: types.Message):
         await send_message(message.from_user.id, 'Usage: /rename newname.')
     else:
         new_nickname = ''.join(args)[:16]
-        check_name = User.select().where(User.nickname == new_nickname)
+        check_name = sql.User.select().where(sql.User.nickname == new_nickname)
         if check_name.exists() or new_nickname == '':
             await send_message(message.from_user.id,
                                f'"{new_nickname}" has already been taken.')
         else:
-            row = User.get(User.id == message.from_user.id)
+            row = sql.User.get(sql.User.id == message.from_user.id)
             row.nickname = new_nickname
             row.save()
             await send_message(message.from_user.id, 
@@ -94,7 +94,7 @@ async def roll(message: types.Message):
 @dp.message_handler(commands=['users'])
 async def print_users(message: types.Message):
     text = ''
-    for user in User.select():
+    for user in sql.User.select():
         text += f'`{str(user.id):12} {user.nickname:16}`\n'
     await message.answer(text, parse_mode=ParseMode.MARKDOWN)
 
@@ -102,7 +102,7 @@ async def print_users(message: types.Message):
 @dp.message_handler(commands=['doors'])
 async def print_doors(message: types.Message):
     text = ''
-    for door in Door.select():
+    for door in sql.Door.select():
         text += f'`{door.id:16} {str(door.players)}/{str(door.max_players)}'+\
                                                                     ' pass: '
         if door.key != None:
@@ -117,7 +117,7 @@ async def db_remove(message: types.Message):
     try:
         id_list = [int(i) for i in message.text.split()[1:]]
         for id in id_list:
-            user = User.select().where(User.id == id)
+            user = sql.User.select().where(sql.User.id == id)
             if user.exists():
                 user.get().delete_instance()
     except:
@@ -150,11 +150,11 @@ async def new_door(message: types.Message):
         return
     if len_args > 2:
         key = args[2]
-    if Door.select().where(Door.id == args[1]).exists():
+    if sql.Door.select().where(sql.Door.id == args[1]).exists():
         await send_message(message.from_user.id, 
                           'Door\'s name has already been taken.')
     else:
-        Door.create(max_players=int(args[0]), id=args[1], 
+        sql.Door.create(max_players=int(args[0]), id=args[1], 
                     key=key, players=1, player_list=[message.from_user.id])
         text = f'/open {args[1]}'
         if key != None:
@@ -170,13 +170,13 @@ async def door_open(message: types.Message):
         await send_message(message.from_user.id,
                                         'Usage: /open gamename password.')
         return
-    if not Door.select().where(Door.id == args[0]).exists:
+    if not sql.Door.select().where(sql.Door.id == args[0]).exists:
         await send_message(message.from_user.id, 'The door does not exist.')
     else:
         if len(args) == 1:
-            Door.get(Door.id == args[0]).entry(message.from_user.id)
+            sql.Door.get(sql.Door.id == args[0]).entry(message.from_user.id)
         else:
-            Door.get(Door.id == args[0]).entry(message.from_user.id, args[1])
+            sql.Door.get(sql.Door.id == args[0]).entry(message.from_user.id, args[1])
         
         
 # test
