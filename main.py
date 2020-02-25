@@ -9,7 +9,7 @@ from aiogram import Bot, Dispatcher, executor, types, exceptions
 from aiogram.types import ParseMode
 
 import sql
-from schedule import send_message, check_mail, msg_counter_reset
+from schedule import *
 from logic import nickname_generator
 
 
@@ -17,7 +17,7 @@ bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
-
+schedule_init(bot)
 
 # registration with testing arguments
 @dp.message_handler(commands=['start'])
