@@ -5,7 +5,8 @@ import logging
 
 from asyncio import sleep
 from aiogram import exceptions
-from main import bot
+
+import main
 
 
 logging.basicConfig(level=logging.INFO)
@@ -57,7 +58,7 @@ async def send_message(user_id: int, text: str):
         await sleep(0.1)
     msg_counter += 1
     try:
-        await bot.send_message(user_id, text)
+        await main.bot.send_message(user_id, text)
     except exceptions.BotBlocked:
         log.exception(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:

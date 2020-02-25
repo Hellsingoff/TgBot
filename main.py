@@ -3,13 +3,13 @@ from os import getenv
 from dotenv import load_dotenv
 import logging
 import signal
-import asyncio
+from asyncio import sleep, CancelledError
 
 from aiogram import Bot, Dispatcher, executor, types, exceptions
 from aiogram.types import ParseMode
 
-from sql import *
-from schedule import *
+from sql import User, Door
+from schedule import send_message, check_mail, msg_counter_reset
 from logic import nickname_generator
 
 
@@ -202,7 +202,7 @@ async def on_shutdown():
     try:
         while True:
             await sleep(120)
-    except asyncio.CancelledError:
+    except CancelledError:
         log.warning('Reboot!')
         await send_message(84381379, 'Reboot!') # tmp 4 test
         dp.stop_polling()
