@@ -6,8 +6,6 @@ import logging
 from asyncio import sleep
 from aiogram import exceptions
 
-import main
-
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
@@ -15,7 +13,10 @@ mailbox = getenv('MAILBOX')
 password = getenv('PASSWORD')
 msg_counter = 0
 MSG_PER_SECOND = 28
+default_bot = 0
 
+def schedule_init(bot):
+    default_bot = bot
 
 # reset msg_counter every second
 async def msg_counter_reset():
@@ -51,14 +52,14 @@ async def check_mail(dp):
 
 
 # safe sending mesage function
-async def send_message(user_id: int, text: str):
+async def send_message(user_id: int, text: str, bot=default_bot):
     global msg_counter
     while msg_counter > MSG_PER_SECOND:
         log.warning('Too many msgs!')
         await sleep(0.1)
     msg_counter += 1
     try:
-        await main.bot.send_message(user_id, text)
+        await bot.send_message(user_id, text)
     except exceptions.BotBlocked:
         log.exception(f"Target [ID:{user_id}]: blocked by user")
     except exceptions.ChatNotFound:
