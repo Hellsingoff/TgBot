@@ -176,12 +176,13 @@ async def door_open(message: types.Message):
         if len(args) == 1:
             sql.Door.get(sql.Door.id == args[0]).entry(message.from_user.id)
         else:
-            sql.Door.get(sql.Door.id == args[0]).entry(message.from_user.id, args[1])
+            sql.Door.get(sql.Door.id == args[0]).entry(
+                                        message.from_user.id, args[1])
         
         
 # test
-@dp.message_handler(lambda message: User.get(
-                        User.id == message.from_user.id).nickname == 'Tomato')
+@dp.message_handler(lambda message: sql.User.get(
+                    sql.User.id == message.from_user.id).nickname == 'Tomato')
 async def echo(message: types.Message):
     await send_message(message.from_user.id, 'TOMATO!')
 
