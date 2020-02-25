@@ -50,7 +50,7 @@ async def check_mail(dp):
 
 
 # safe sending mesage function
-async def send_message(user_id: int, text: str, bot=default_bot):
+async def send_message(user_id: int, text: str):
     global msg_counter
     while msg_counter > MSG_PER_SECOND:
         log.warning('Too many msgs!')
