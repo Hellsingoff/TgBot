@@ -13,11 +13,8 @@ mailbox = getenv('MAILBOX')
 password = getenv('PASSWORD')
 msg_counter = 0
 MSG_PER_SECOND = 28
-default_bot = ''
+bot = Bot(token=getenv('TG_TOKEN'))
 
-def schedule_init(bot):
-    global default_bot
-    default_bot = bot
 
 # reset msg_counter every second
 async def msg_counter_reset():

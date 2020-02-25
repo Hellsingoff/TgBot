@@ -17,7 +17,6 @@ bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
-schedule_init(bot)
 
 # registration with testing arguments
 @dp.message_handler(commands=['start'])
