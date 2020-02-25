@@ -13,7 +13,7 @@ mailbox = getenv('MAILBOX')
 password = getenv('PASSWORD')
 msg_counter = 0
 MSG_PER_SECOND = 28
-default_bot = Bot()
+default_bot = ''
 
 def schedule_init(bot):
     global default_bot
