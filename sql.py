@@ -36,6 +36,7 @@ class Door(Model):
         else:
             self.players += 1
             self.player_list.append(id)
+            self.save()
             player = User.get(User.id == id).nickname
             self.say(f'{player} joined the game. ' + 
                      f'{self.players}/{self.max_players}')

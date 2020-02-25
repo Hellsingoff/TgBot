@@ -172,9 +172,10 @@ async def door_open(message: types.Message):
         await send_message(message.from_user.id, 'The door does not exist.')
     else:
         if len(args) == 1:
-            sql.Door.get(sql.Door.id == args[0]).entry(message.from_user.id)
+            await sql.Door.get(sql.Door.id == args[0]).entry(
+                                                    message.from_user.id)
         else:
-            sql.Door.get(sql.Door.id == args[0]).entry(
+            await sql.Door.get(sql.Door.id == args[0]).entry(
                                         message.from_user.id, args[1])
         
         
