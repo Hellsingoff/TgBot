@@ -13,7 +13,7 @@ db = connect(getenv('DATABASE_URL'))
 class User(Model):
     id = IntegerField(null=False, unique=True)
     nickname = CharField(null=False, unique=True, max_length=16)
-    status = CharField(null=False, max_length=4)
+    status = CharField(null=False, max_length=4, default='menu')
     game = CharField(max_length=16)
     class Meta:
         database = db
