@@ -69,9 +69,9 @@ async def rename(message: types.Message):
             await send_message(message.from_user.id,
                                f'"{new_nickname}" has already been taken.')
         else:
-            row = sql.User.get(sql.User.id == message.from_user.id)
-            row.nickname = new_nickname
-            row.save()
+            user = sql.User.get(sql.User.id == message.from_user.id)
+            user.nickname = new_nickname
+            user.save()
             await send_message(message.from_user.id, 
                                f'OK, now we will call you {new_nickname}')
 
@@ -94,7 +94,7 @@ async def roll(message: types.Message):
 async def print_users(message: types.Message):
     text = ''
     for user in sql.User.select():
-        text += f'`{str(user.id):12} {user.nickname:16}`\n'
+        text += f'`{str(user.id):12} {user.nickname:16} {user.status}`\n'
     await message.answer(text, parse_mode=ParseMode.MARKDOWN)
 
 # test print doors function
@@ -127,7 +127,7 @@ async def db_remove(message: types.Message):
 @dp.message_handler(commands=['ping'])
 async def ping_me(message: types.Message):
     args = message.text.split()[1:3]
-    if args[0].isdigit and args[1].isdigit:
+    if len(args) > 1 and args[0].isdigit and args[1].isdigit:
         for i in range(int(args[0])):
             await send_message(message.from_user.id, int(args[0]) - i)
             await sleep(int(args[1]))
@@ -137,48 +137,77 @@ async def ping_me(message: types.Message):
 async def new_door(message: types.Message):
     args = message.text.split()[1:]
     key = None
-    if (len_args := len(args)) < 2 or not args[0].isdigit():
-        await send_message(message.from_user.id, 
+    user = sql.User.get(sql.User.id == message.from_user.id)
+    if (user.status != 'menu'):
+        await send_message(user.id, 'You are already in another game.')
+        return
+    elif (len_args := len(args)) < 2 or not args[0].isdigit():
+        await send_message(user.id, 
                           'Usage: /create maxplayers name password(optional)')
         return
     elif int(args[0]) < 2 or len(args[1]) > 16 or (len(args) > 2 and 
                                                 len(args[2]) > 16):
-        await send_message(message.from_user.id, 'Error!\nMax players must ' +
-                                    'be more than 1.\nName and password ' + 
-                                    'must be no more than 16 characters.')
+        await send_message(user.id, 'Error!\nMax players must be more ' +
+                                    'than 1.\nName and password must ' + 
+                                    'be no more than 16 characters.')
         return
     if len_args > 2:
         key = args[2]
     if sql.Door.select().where(sql.Door.id == args[1]).exists():
-        await send_message(message.from_user.id, 
-                          'Door\'s name has already been taken.')
+        await send_message(user.id, 'Door\'s name has already been taken.')
     else:
-        sql.Door.create(max_players=int(args[0]), id=args[1], 
-                    key=key, players=1, player_list=[message.from_user.id])
+        sql.Door.create(max_players=int(args[0]), id=args[1], key=key,
+                        players=1, player_list=[user.id])
         text = f'/open {args[1]}'
         if key != None:
             text += f' {key}'
         text += '\nEntrance to this room.'
-        await send_message(message.from_user.id, text)
+        await send_message(user.id, text)
 
 # entr in door
 @dp.message_handler(commands=['open'])
 async def door_open(message: types.Message):
     args = message.text.splitlines()[0].split()[1:]
+    user = sql.User.get(sql.User.id == message.from_user.id)
     if len(args) == 0:
-        await send_message(message.from_user.id,
-                                        'Usage: /open gamename password.')
+        await send_message(user.id, 'Usage: /open gamename password.')
     elif not sql.Door.select().where(sql.Door.id == args[0]).exists():
-        await send_message(message.from_user.id, 'The door does not exist.')
+        await send_message(user.id, 'The door does not exist.')
     else:
-        if len(args) == 1:
-            await sql.Door.get(sql.Door.id == args[0]).entry(
-                                                    message.from_user.id)
+        if (user.status != 'menu'):
+            await send_message(user.id, 'You are already in another game.')
+        elif len(args) == 1:
+            await sql.Door.get(sql.Door.id == args[0]).entry(user)
         else:
-            await sql.Door.get(sql.Door.id == args[0]).entry(
-                                        message.from_user.id, args[1])
-        
-        
+            await sql.Door.get(sql.Door.id == args[0]).entry(user, args[1])
+
+# get out
+@dp.message_handler(commands=['exit'])
+async def user_exit(message: types.Message):
+    user = sql.User.get(sql.User.id == message.from_user.id)
+    if user.status == 'menu':
+        await send_message(message.from_user.id, 'WUT?')
+        return
+    elif user.status == 'door':
+        await sql.Door.get(sql.Door.id == user.game).exit(user)
+    else:
+        # exit game method must be here
+        a = 0 # dummy
+
+# chat
+@dp.message_handler(commands=['say'])
+async def chat(message: types.Message):
+    user = sql.User.get(sql.User.id == message.from_user.id)
+    if user.status == 'menu':
+        await send_message(message.from_user.id, 'WUT?')
+        return
+    elif user.status == 'door':
+        await sql.Door.get(sql.Door.id == user.game).say(
+                                        f'{user.nickname}: {message.text}')
+    else:
+        # ingame chat method must be here
+        a = 0 # dummy
+
 # test
 @dp.message_handler(lambda message: sql.User.get(
                     sql.User.id == message.from_user.id).nickname == 'Tomato')
