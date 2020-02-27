@@ -205,8 +205,9 @@ async def chat(message: types.Message):
         await send_message(message.from_user.id, 'WUT?')
         return
     elif user.status == 'door':
+        await bot.delete_message(message.chat.id, message.message_id)
         await sql.Door.get(sql.Door.id == user.game).say(
-                                        f'{user.nickname}: {message.text}')
+                                        f'{user.nickname}: {message.text[4:]}')
     else:
         # ingame chat method must be here
         a = 0 # dummy
