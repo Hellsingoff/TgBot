@@ -219,7 +219,7 @@ async def sticker(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
     if user.status == 'door':
         await sql.Door.get(sql.Door.id == user.game).sticker(user.id, 
-                                            user.nickname, message.sticker)
+                                    user.nickname, message.sticker.file_id)
     else:
         # ingame chat method must be here
         a = 0 # dummy
@@ -228,7 +228,7 @@ async def sticker(message: types.Message):
 @dp.message_handler(lambda message: len(message.text) > 0 and 
                                     message.text[0] == '/')
 async def wut(message: types.Message):
-    await message.reply('WUT?')
+    await message.answer('WUT?')
 
 # error handler
 @dp.errors_handler()
