@@ -3,8 +3,9 @@ from os import getenv
 from peewee import *
 from playhouse.db_url import connect
 from playhouse.postgres_ext import ArrayField
+from aiogram import SendSticker
 
-from schedule import send_message
+from schedule import send_message, bot
 
 
 db = connect(getenv('DATABASE_URL'))
@@ -65,6 +66,12 @@ class Door(Model):
         for player in self.player_list:
             if player != id:
                 await send_message(player, text)
+    
+    async def sticker(self, id, nickname, sticker):
+        for player in self.player_list:
+            if player != id:
+                await send_message(player, f'{nickname}:')
+                await bot.send_sticker(player, sticker)
 
     async def exit(self, user):
         self.player_list.remove(user.id)

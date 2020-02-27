@@ -193,34 +193,42 @@ async def user_exit(message: types.Message):
         return
     elif user.status == 'door':
         await sql.Door.get(sql.Door.id == user.game).exit(user)
+        await send_message(message.from_user.id, 'Done.')
     else:
         # exit game method must be here
         a = 0 # dummy
 
 # chat
-@dp.message_handler(commands=['say'])
+@dp.message_handler(lambda message: len(message.text) > 0 and 
+                        message.text[0] != '/' and sql.User.get(
+                        sql.User.id == message.from_user.id).status != 'menu')
 async def chat(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
-    if user.status == 'menu':
-        await send_message(message.from_user.id, 'WUT?')
-    elif user.status == 'door':
-        await sql.Door.get(sql.Door.id == user.game).chat(user.id,
-                                        f'{user.nickname}: {message.text[4:]}')
+    if user.status == 'door':
+        sql.Door.get(sql.Door.id == user.game).chat(user.id,
+                                        f'{user.nickname}: {message.text}')
     else:
         # ingame chat method must be here
         a = 0 # dummy
 
-# test
+# chat sticker
 @dp.message_handler(lambda message: sql.User.get(
-                    sql.User.id == message.from_user.id).nickname == 'Tomato')
-async def echo(message: types.Message):
-    await send_message(message.from_user.id, 'TOMATO!')
+                    sql.User.id == message.from_user.id).status != 'menu',
+                    content_types=['sticker'])
+async def sticker(message: types.Message):
+    user = sql.User.get(sql.User.id == message.from_user.id)
+    if user.status == 'door':
+        sql.Door.get(sql.Door.id == user.game).sticker(user.id, user.nickname,
+                                                        message.sticker)
+    else:
+        # ingame chat method must be here
+        a = 0 # dummy
 
-# echo
-@dp.message_handler()
-async def echo(message: types.Message):
-    await send_message(message.from_user.id, 
-                       f'{message.text}? What does "{message.text}" mean?')
+# unknown command
+@dp.message_handler(lambda message: len(message.text) > 0 and 
+                                    message.text[0] == '/')
+async def wut(message: types.Message):
+    await message.reply('WUT?')
 
 # error handler
 @dp.errors_handler()
