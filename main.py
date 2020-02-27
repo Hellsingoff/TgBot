@@ -203,7 +203,6 @@ async def chat(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
     if user.status == 'menu':
         await send_message(message.from_user.id, 'WUT?')
-        return
     elif user.status == 'door':
         await bot.delete_message(message.chat.id, message.message_id)
         await sql.Door.get(sql.Door.id == user.game).say(
@@ -211,6 +210,11 @@ async def chat(message: types.Message):
     else:
         # ingame chat method must be here
         a = 0 # dummy
+
+# edit test
+@dp.message_handler(commands=['edit'])
+async def edit(message: types.Message):
+    bot.edit_message_text('Done!', message.chat.id, message.message_id)
 
 # test
 @dp.message_handler(lambda message: sql.User.get(
