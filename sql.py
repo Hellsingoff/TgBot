@@ -3,7 +3,6 @@ from os import getenv
 from peewee import *
 from playhouse.db_url import connect
 from playhouse.postgres_ext import ArrayField
-from aiogram import SendSticker
 
 from schedule import send_message, bot
 
