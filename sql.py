@@ -60,6 +60,11 @@ class Door(Model):
     async def say(self, text):
         for player in self.player_list:
             await send_message(player, text)
+    
+    async def chat(self, id, text):
+        for player in self.player_list:
+            if player != id:
+                await send_message(player, text)
 
     async def exit(self, user):
         self.player_list.remove(user.id)
