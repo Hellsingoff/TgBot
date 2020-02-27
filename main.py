@@ -158,6 +158,9 @@ async def new_door(message: types.Message):
     else:
         sql.Door.create(max_players=int(args[0]), id=args[1], key=key,
                         players=1, player_list=[user.id])
+        user.status = 'door'
+        user.game = args[1]
+        user.save()
         text = f'/open {args[1]}'
         if key != None:
             text += f' {key}'
