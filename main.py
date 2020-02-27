@@ -214,7 +214,7 @@ async def chat(message: types.Message):
 # edit test
 @dp.message_handler(commands=['edit'])
 async def edit(message: types.Message):
-    bot.edit_message_text('Done!', message.chat.id, message.message_id)
+    await bot.edit_message_text('Done!', message.chat.id, message.message_id)
 
 # test
 @dp.message_handler(lambda message: sql.User.get(
