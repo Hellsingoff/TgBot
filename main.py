@@ -205,7 +205,7 @@ async def user_exit(message: types.Message):
 async def chat(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
     if user.status == 'door':
-        sql.Door.get(sql.Door.id == user.game).chat(user.id,
+        await sql.Door.get(sql.Door.id == user.game).chat(user.id,
                                         f'{user.nickname}: {message.text}')
     else:
         # ingame chat method must be here
@@ -218,8 +218,8 @@ async def chat(message: types.Message):
 async def sticker(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
     if user.status == 'door':
-        sql.Door.get(sql.Door.id == user.game).sticker(user.id, user.nickname,
-                                                        message.sticker)
+        await sql.Door.get(sql.Door.id == user.game).sticker(user.id, 
+                                            user.nickname, message.sticker)
     else:
         # ingame chat method must be here
         a = 0 # dummy
