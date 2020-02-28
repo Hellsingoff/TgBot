@@ -107,7 +107,7 @@ async def print_users(message: types.Message):
 async def print_doors(message: types.Message):
     text = ''
     for door in sql.Door.select():
-        text += f'`{door.id:16} {str(door.players)}/{str(door.max_players)}' + \
+        text += f'`{door.id:16} {door.game:8} {str(door.players)}/{str(door.max_players)}' + \
                 ' pass: '
         if door.key is not None:
             text += 'yes`\n'
