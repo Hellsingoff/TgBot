@@ -6,7 +6,6 @@ import logging
 from asyncio import sleep
 from aiogram import exceptions, Bot
 
-
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 mailbox = getenv('MAILBOX')
@@ -26,7 +25,7 @@ async def msg_counter_reset():
 
 # check mail
 async def check_mail(dp):
-    await send_message(84381379, 'It\'s alive!') # tmp 4 test
+    await send_message(84381379, 'It\'s alive!')  # tmp 4 test
     while True:
         try:
             pop3server = poplib.POP3_SSL('pop.gmail.com')
@@ -36,12 +35,12 @@ async def check_mail(dp):
             mailcount = pop3info[0]
             text = ''
             for i in range(mailcount):
-                for message in pop3server.retr(i+1)[1]:
+                for message in pop3server.retr(i + 1)[1]:
                     msg = email.message_from_bytes(message)
                     text += msg.get_payload() + '\n'
-            if text.find('DATABASE_URL on epicspellwars requires maintenance')>-1:
+            if text.find('DATABASE_URL on epicspellwars requires maintenance') > -1:
                 log.warning('Maintenance!')
-                await send_message(84381379, 'Maintenance!') # tmp 4 test
+                await send_message(84381379, 'Maintenance!')  # tmp 4 test
                 dp.stop_polling()
             pop3server.quit()
         except:
@@ -49,8 +48,8 @@ async def check_mail(dp):
         await sleep(61)
 
 
-# safe sending mesage function
-async def send_message(user_id: int, text: str):
+# safe sending message function
+async def send_message(user_id: int, text: str) -> bool:
     global msg_counter
     while msg_counter > MSG_PER_SECOND:
         log.warning('Too many msgs!')
@@ -59,28 +58,28 @@ async def send_message(user_id: int, text: str):
     try:
         await bot.send_message(user_id, text)
     except exceptions.BotBlocked:
-        log.exception(f"Target [ID:{user_id}]: blocked by user")
+        log.exception(f'Target [ID:{user_id}]: blocked by user')
     except exceptions.ChatNotFound:
-        log.exception(f"Target [ID:{user_id}]: invalid user ID")
+        log.exception(f'Target [ID:{user_id}]: invalid user ID')
     except exceptions.RetryAfter as e:
-        log.exception(f"Target [ID:{user_id}]: Flood limit is exceeded." +
-                                        "Sleep {e.timeout} seconds.")
+        log.exception(f'Target [ID:{user_id}]: Flood limit is exceeded.' +
+                      f'Sleep {e.timeout} seconds.')
         await sleep(e.timeout)
         return await send_message(user_id, text)
     except exceptions.UserDeactivated:
-        log.exception(f"Target [ID:{user_id}]: user is deactivated")
+        log.exception(f'Target [ID:{user_id}]: user is deactivated')
     except exceptions.MessageIsTooLong:
-        log.exception(f"Target [ID:{user_id}]: msg len {len(text)}")
+        log.exception(f'Target [ID:{user_id}]: msg len {len(text)}')
         start_char = 0
         while start_char <= len(text):
             await send_message(user_id, text[start_char:start_char + 4096])
             start_char += 4096
     except exceptions.NetworkError:
-        log.exception(f"Target [ID:{user_id}]: NetworkError")
+        log.exception(f'Target [ID:{user_id}]: NetworkError')
         await sleep(1)
         return await send_message(user_id, text[:4096])
     except exceptions.TelegramAPIError:
-        log.exception(f"Target [ID:{user_id}]: failed")
+        log.exception(f'Target [ID:{user_id}]: failed')
     else:
         return True
     return False
