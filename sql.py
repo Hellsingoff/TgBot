@@ -2,12 +2,10 @@ from os import getenv
 
 import urllib.parse as urlparse
 from peewee import *
-from playhouse.db_url import connect
 from playhouse.postgres_ext import ArrayField, PostgresqlExtDatabase, HStoreField
 
 from schedule import send_message, bot
-
-#url = getenv('DATABASE_URL')
+from bones import Bones
 
 urlparse.uses_netloc.append('postgres')
 url = urlparse.urlparse(getenv("DATABASE_URL"))
@@ -17,10 +15,7 @@ db = PostgresqlExtDatabase(database=url.path[1:],
                            host=url.hostname,
                            port=url.port,
                            register_hstore=True)
-
-#db = connect(url)
-#ext_db = PostgresqlExtDatabase(url[url.rfind('/')+1:], register_hstore=True)
-#ext_db.connect()
+games = {'bones': Bones}
 
 
 class User(Model):
@@ -57,21 +52,31 @@ class Door(Model):
             self.players += 1
             self.player_list.append(user.id)
             self.save()
-            if self.players != self.max_players:
+            if self.players < self.max_players:
                 await self.say(f'{user.nickname} joined the game.\n' +
                                f'{self.players}/{self.max_players}')
                 user.status = 'door'
                 user.game = self.id
                 user.save()
             else:
+                self.delete_instance()
                 await self.say(f'{user.nickname} joined the game.\n' +
                                'Let\'s play a game...')
-                self.delete_instance()
-                for user_id in self.player_list:  # tmp
-                    player = User.get(User.id == user_id)  # tmp
-                    player.status = 'menu'  # tmp
-                    player.game = None  # tmp
-                    player.save()  # tmp
+                names = []
+                waiting = []
+                for user_id in self.player_list:
+                    player = User.get(User.id == user_id)
+                    player.status = 'room'
+                    player.game = self.id
+                    player.save()
+                    names.append(player.nickname)
+                    waiting.append(False)
+                new_game = Room.create(id=self.id,
+                                       game=self.game,
+                                       players=self.player_list,
+                                       names=names,
+                                       waiting=waiting)
+                new_game.start()
 
     async def say(self, text):
         for player in self.player_list:
@@ -114,3 +119,6 @@ class Room(Model):
     class Meta:
         database = db
         db_table = 'rooms'
+
+    async def start(self):
+        await games[self.game].start(self)

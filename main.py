@@ -159,7 +159,7 @@ async def new_door(message: types.Message):
         user.status = 'door'
         user.game = args[2]
         user.save()
-        text = f'/open {args[1]}'
+        text = f'/open {args[2]}'
         if key is not None:
             text += f' {key}'
         text += '\nEntrance to this room.'
