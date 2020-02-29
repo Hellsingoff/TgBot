@@ -121,4 +121,5 @@ class Room(Model):
         db_table = 'rooms'
 
     async def start(self):
-        await games[self.game].start(self)
+        room = self
+        await games[self.game].start(room)
