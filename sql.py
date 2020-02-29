@@ -100,5 +100,5 @@ class Room(Model):
     players_last = ArrayField(TextField)
 
     class Meta:
-        database = ext_db
+        database = db
         db_table = 'rooms'
