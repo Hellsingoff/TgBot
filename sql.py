@@ -76,7 +76,7 @@ class Door(Model):
                                        players=self.player_list,
                                        names=names,
                                        waiting=waiting)
-                new_game.start()
+                await new_game.start()
 
     async def say(self, text):
         for player in self.player_list:
