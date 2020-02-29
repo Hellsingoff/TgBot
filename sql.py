@@ -7,8 +7,7 @@ from playhouse.postgres_ext import ArrayField, PostgresqlExtDatabase, HStoreFiel
 
 from schedule import send_message, bot
 
-db = connect(getenv('DATABASE_URL'))
-psycopg2.extras.register_hstore(db)
+db = connect(getenv('DATABASE_URL'), register_hstore=True)
 
 
 class User(Model):
