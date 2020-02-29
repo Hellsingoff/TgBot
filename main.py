@@ -142,8 +142,8 @@ async def new_door(message: types.Message):
     elif (len_args := len(args)) < 2 or not args[0].isdigit():
         await send_message(user.id, 'Usage: /create maxplayers game name password(optional)')
         return
-    elif int(args[0]) < 3 or args[1] not in game_list or len(args[2]) > 16 or \
-                                            (len(args) > 2 and len(args[3]) > 16):
+    elif int(args[0]) < 2 or args[1] not in game_list or len(args[2]) > 16 or \
+                                            (len(args) > 3 and len(args[3]) > 16):
         await send_message(user.id, 'Error!\nMax players must be more ' +
                            'than 1.\nName and password must ' +
                            'be no more than 16 characters.')
