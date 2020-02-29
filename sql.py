@@ -7,10 +7,20 @@ from playhouse.postgres_ext import ArrayField, PostgresqlExtDatabase, HStoreFiel
 
 from schedule import send_message, bot
 
-url = getenv('DATABASE_URL')
-db = connect(url)
-ext_db = PostgresqlExtDatabase(url[url.rfind('/')+1:], register_hstore=True)
-ext_db.connect()
+#url = getenv('DATABASE_URL')
+
+urlparse.uses_netloc.append('postgres')
+url = urlparse.urlparse(getenv("DATABASE_URL"))
+db = PostgresqlExtDatabase(database=url.path[1:],
+                           user=url.username,
+                           password=url.password,
+                           host=url.hostname,
+                           port=url.port,
+                           register_hstore=True)
+
+#db = connect(url)
+#ext_db = PostgresqlExtDatabase(url[url.rfind('/')+1:], register_hstore=True)
+#ext_db.connect()
 
 
 class User(Model):
@@ -102,5 +112,5 @@ class Room(Model):
     players_last = ArrayField(TextField)
 
     class Meta:
-        database = ext_db
+        database = db
         db_table = 'rooms'
