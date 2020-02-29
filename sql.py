@@ -1,13 +1,14 @@
 from os import getenv
 
-import psycopg2
+import urllib.parse as urlparse
 from peewee import *
 from playhouse.db_url import connect
 from playhouse.postgres_ext import ArrayField, PostgresqlExtDatabase, HStoreField
 
 from schedule import send_message, bot
 
-db = connect(getenv('DATABASE_URL'), register_hstore=True)
+db = connect(getenv('DATABASE_URL'))
+ext_db = PostgresqlExtDatabase(db, register_hstore=True)
 
 
 class User(Model):
