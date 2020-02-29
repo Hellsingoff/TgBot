@@ -7,9 +7,9 @@ from playhouse.postgres_ext import ArrayField, PostgresqlExtDatabase, HStoreFiel
 
 from schedule import send_message, bot
 
-db = connect(getenv('DATABASE_URL'))
-url = urlparse.urlparse(getenv('DATABASE_URL'))
-ext_db = PostgresqlExtDatabase(url[6], register_hstore=True)
+url = getenv('DATABASE_URL')
+db = connect(url)
+ext_db = PostgresqlExtDatabase(url[url.rfind('/')+1:], register_hstore=True)
 
 
 class User(Model):
