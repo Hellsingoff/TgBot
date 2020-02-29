@@ -10,6 +10,7 @@ from schedule import send_message, bot
 url = getenv('DATABASE_URL')
 db = connect(url)
 ext_db = PostgresqlExtDatabase(url[url.rfind('/')+1:], register_hstore=True)
+ext_db.connect()
 
 
 class User(Model):
