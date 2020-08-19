@@ -9,13 +9,23 @@ from aiogram.types import ParseMode
 
 import sql
 from schedule import *
-from logic import nickname_generator
 
 bot = Bot(token=getenv('TG_TOKEN'))
 dp = Dispatcher(bot)
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('broadcast')
 game_list = ['bones']
+
+
+# nickname generator
+def nickname_generator(nickname):
+    count = 1
+    while sql.User.select().where(sql.User.nickname == nickname + str(count)
+                                  ).exists():
+        count += 1
+        if len(nickname + str(count)) > 16:
+            return nickname_generator('Player')
+    return nickname + str(count)
 
 
 # registration with testing arguments
