@@ -1,4 +1,6 @@
 from os import getenv
+from threading import Thread
+
 from dotenv import load_dotenv
 import logging
 import signal
@@ -188,8 +190,8 @@ async def user_exit(message: types.Message):
 
 # chat
 @dp.message_handler(lambda message: len(message.text) > 0 and
-                                    message.text[0] != '/' and sql.User.get(
-    sql.User.id == message.from_user.id).status != 'menu')
+                    message.text[0] != '/' and sql.User.get(
+                    sql.User.id == message.from_user.id).status != 'menu')
 async def chat(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
     text = f'{user.nickname}: {message.text}'
@@ -236,30 +238,23 @@ async def error_log(*args):
     log.error(f'Error handler: {args}')
 
 
-# on shutdown
-async def on_shutdown():
+def shutdown():
     log.warning('Reboot!')
-    await send_message(84381379, 'Reboot!')  # tmp 4 test
+    send_message(84381379, 'Reboot!')  # tmp 4 test
     dp.stop_polling()
-    await sleep(15)
+    sleep(20)
     exit()
+
+
+# on shutdown
+def sig_handler():
+    signal.signal(signal.SIGTERM, shutdown)
 
 
 if __name__ == '__main__':
     log.info('Start.')
     load_dotenv()
+    Thread(target=sig_handler).start()
     dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
-    '''
-    loop = asyncio.get_event_loop()
-    waiting_sigterm = asyncio.ensure_future(on_shutdown())
-    loop.add_signal_handler(signal.SIGTERM, waiting_sigterm.cancel)
-    try:
-        loop.run_until_complete(waiting_sigterm)
-    finally:
-        loop.close()
-    '''
-    try:
-        executor.start_polling(dp)
-    finally:
-        on_shutdown()
+    executor.start_polling(dp)
