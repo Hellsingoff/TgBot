@@ -1,4 +1,3 @@
-from random import randint
 from os import getenv
 from dotenv import load_dotenv
 import logging
@@ -25,22 +24,15 @@ async def start(message: types.Message):
     id = message.from_user.id
     text = message.text.split()[1:]  # tmp
     if len(text) > 1 and text[0].isdigit:  # tmp to test db
-        try:
-            id = int(text[0])
-        except:
-            await message.answer('Error!')
-            return
+        id = int(text[0])
     reply = ''
     user = sql.User.select().where(sql.User.id == id)
     if user.exists():
         await send_message(message.from_user.id, f'{user.get().nickname}, ' +
-                           'you are already exist in db!')
+                           'you are already exist!')
     else:
         if len(text) > 1:  # tmp to test db
-            try:
-                nickname = ''.join(text[1:])[:16]
-            except:
-                nickname = nickname_generator('Player')  # end test
+            nickname = ''.join(text[1:])[:16]
         elif type(username := message.from_user.username) is str:
             nickname = username[:16]
         elif type(f_name := message.from_user.first_name) is str:
@@ -62,35 +54,22 @@ async def start(message: types.Message):
 @dp.message_handler(commands=['rename'])
 async def rename(message: types.Message):
     args = message.text.split()[1:]
-    if len(args) < 1:
-        await send_message(message.from_user.id, 'Usage: /rename newname.')
+    user = sql.User.get(sql.User.id == message.from_user.id)
+    if user.status != 'menu':
+        await send_message(user.id, 'You can change name only in menu.')
+    elif len(args) < 1:
+        await send_message(user.id, 'Usage: /rename newname.')
     else:
         new_nickname = ''.join(args)[:16]
         check_name = sql.User.select().where(sql.User.nickname == new_nickname)
         if check_name.exists() or new_nickname == '':
-            await send_message(message.from_user.id,
+            await send_message(user.id,
                                f'"{new_nickname}" has already been taken.')
         else:
-            user = sql.User.get(sql.User.id == message.from_user.id)
             user.nickname = new_nickname
             user.save()
-            await send_message(message.from_user.id,
+            await send_message(user.id,
                                f'OK, now we will call you {new_nickname}')
-
-
-# rework to return
-@dp.message_handler(commands=['roll'])
-async def roll(message: types.Message):
-    args = message.text.split()
-    if len(args) > 1 and args[1].isdigit:
-        result = [0, 0, 0, 0, 0, 0]
-        args[1] = int(args[1])
-        while args[1] > 0:
-            result[randint(0, 5)] += 1
-            args[1] -= 1
-        await send_message(message.from_user.id, f'🎲 {str(result)}')
-    else:
-        await message.answer(f'🎲 {str(randint(1, 6))}')
 
 
 # test print users function
@@ -106,13 +85,12 @@ async def print_users(message: types.Message):
 @dp.message_handler(commands=['doors'])
 async def print_doors(message: types.Message):
     text = ''
-    for door in sql.Door.select():
-        text += f'`{door.id:16} {door.game:8} {str(door.players)}/{str(door.max_players)}' + \
-                ' pass: '
-        if door.key is not None:
-            text += 'yes`\n'
+    for d in sql.Door.select():
+        text += f'`{d.id:16} {d.game:8} {str(d.players)}/{str(d.max_players)}'
+        if d.key is not None:
+            text += ' pass: yes`\n'
         else:
-            text += ' no`\n'
+            text += ' pass: no`\n'
     await message.answer(text, parse_mode=ParseMode.MARKDOWN)
 
 
@@ -125,7 +103,7 @@ async def db_remove(message: types.Message):
             user = sql.User.select().where(sql.User.id == id)
             if user.exists():
                 user.get().delete_instance()
-    except:
+    except ValueError:
         await message.answer('Error!')
     await print_users(message)
 
@@ -140,13 +118,14 @@ async def new_door(message: types.Message):
         await send_message(user.id, 'You are already in another game.')
         return
     elif (len_args := len(args)) < 2 or not args[0].isdigit():
-        await send_message(user.id, 'Usage: /create maxplayers game name password(optional)')
+        await send_message(user.id,
+                           'Usage: /create maxplayers game name key(optional)')
         return
-    elif int(args[0]) < 2 or args[1] not in game_list or len(args[2]) > 16 or \
-                                            (len(args) > 3 and len(args[3]) > 16):
-        await send_message(user.id, 'Error!\nMax players must be more ' +
-                           'than 1.\nName and password must ' +
-                           'be no more than 16 characters.')
+    elif (int(args[0]) < 2 or args[1] not in game_list or len(args[2]) > 16 or
+          (len(args) > 3 and len(args[3]) > 16)):
+        await send_message(user.id,
+                           'Error!\nMax players must be more than 1.\nName ' +
+                           'and key must be no more than 16 characters.')
         return
     if len_args > 3:
         key = args[3]
@@ -154,8 +133,8 @@ async def new_door(message: types.Message):
             sql.Room.select().where(sql.Room.id == args[1]).exists():
         await send_message(user.id, 'Door\'s name has already been taken.')
     else:
-        sql.Door.create(max_players=int(args[0]), game=args[1], id=args[2], key=key,
-                        players=1, player_list=[user.id])
+        sql.Door.create(max_players=int(args[0]), game=args[1], id=args[2],
+                        key=key, players=1, player_list=[user.id])
         user.status = 'door'
         user.game = args[2]
         user.save()
@@ -172,7 +151,7 @@ async def door_open(message: types.Message):
     args = message.text.splitlines()[0].split()[1:]
     user = sql.User.get(sql.User.id == message.from_user.id)
     if len(args) == 0:
-        await send_message(user.id, 'Usage: /open gamename password.')
+        await send_message(user.id, 'Usage: /open door key.')
     elif not sql.Door.select().where(sql.Door.id == args[0]).exists():
         await send_message(user.id, 'The door does not exist.')
     else:
@@ -199,25 +178,31 @@ async def user_exit(message: types.Message):
 
 # chat
 @dp.message_handler(lambda message: len(message.text) > 0 and
-                    message.text[0] != '/' and sql.User.get(
-                    sql.User.id == message.from_user.id).status != 'menu')
+                                    message.text[0] != '/' and sql.User.get(
+    sql.User.id == message.from_user.id).status != 'menu')
 async def chat(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
+    text = f'{user.nickname}: {message.text}'
     if user.status == 'door':
-        await sql.Door.get(sql.Door.id == user.game).chat(user.id,
-                                                          f'{user.nickname}: {message.text}')
-    # else: ingame chat method must be here
+        await sql.Door.get(sql.Door.id == user.game).chat(user.id, text)
+    elif user.status == 'room':
+        await sql.Room.get(sql.Room.id == user.game).chat(user.id, text)
 
 
 # chat sticker
-@dp.message_handler(lambda message: sql.User.get(
-    sql.User.id == message.from_user.id).status != 'menu',
-                    content_types=['sticker'])
+@dp.message_handler(content_types=['sticker'])
 async def sticker(message: types.Message):
     user = sql.User.get(sql.User.id == message.from_user.id)
     if user.status == 'door':
-        await sql.Door.get(sql.Door.id == user.game).sticker(user.id,
-                                                             user.nickname, message.sticker.file_id)
+        await sql.Door.get(sql.Door.id == user.game
+                           ).sticker(user.id,
+                                     user.nickname,
+                                     message.sticker.file_id)
+    elif user.status == 'room':
+        await sql.Room.get(sql.Door.id == user.game
+                           ).sticker(user.id,
+                                     user.nickname,
+                                     message.sticker.file_id)
     else:
         await bot.delete_message(message.chat.id, message.message_id)
 
@@ -268,4 +253,11 @@ if __name__ == '__main__':
     finally:
         loop.close()
     '''
-    executor.start_polling(dp)
+    try:
+        executor.start_polling(dp)
+    finally:
+        log.warning('Reboot!')
+        await send_message(84381379, 'Reboot!')  # tmp 4 test
+        dp.stop_polling()
+        await sleep(15)
+        exit()

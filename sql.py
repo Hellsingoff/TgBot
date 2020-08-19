@@ -5,7 +5,7 @@ from peewee import *
 from playhouse.postgres_ext import ArrayField, PostgresqlExtDatabase, HStoreField
 
 from schedule import send_message, bot
-from bones import Bones
+import bones
 
 urlparse.uses_netloc.append('postgres')
 url = urlparse.urlparse(getenv("DATABASE_URL"))
@@ -15,7 +15,7 @@ db = PostgresqlExtDatabase(database=url.path[1:],
                            host=url.hostname,
                            port=url.port,
                            register_hstore=True)
-games = {'bones': Bones}
+games = {'bones': bones}
 
 
 class User(Model):
@@ -109,6 +109,7 @@ class Door(Model):
 class Room(Model):
     id = CharField(null=False, unique=True, max_length=16)
     game = CharField(null=False, max_length=8)
+    round = SmallIntegerField(null=False, default=0)
     players = ArrayField(IntegerField)
     names = ArrayField(CharField)
     stats = HStoreField()
@@ -122,4 +123,33 @@ class Room(Model):
 
     async def start(self):
         game = games[self.game]
-        await game.start(self)
+        verb = await game.start(self)  # Room.get(Room.id == self.id)
+        if 's' in verb:            # fix this
+            self.say()            # fix this
+        if 'w' in verb:            # fix this
+            self.whisper_all()            # fix this
+
+    async def turn(self, id):
+        game = games[self.game]
+        game.turn(self, id)
+        if True not in self.waiting:
+            game.round()  # working now
+
+    async def say(self, text=last):
+        for player in self.players:
+            await send_message(player, text)
+
+    async def whisper_all(self, text=last):         #fix
+        for player in self.players:         #fix
+            await send_message(player, text)         #fix
+
+    async def chat(self, id, text):
+        for player in self.players:
+            if player != id:
+                await send_message(player, text)
+
+    async def sticker(self, id, nickname, sticker):
+        for player in self.player_list:
+            if player != id:
+                await send_message(player, f'{nickname}:')
+                await bot.send_sticker(player, sticker)

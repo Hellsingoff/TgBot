@@ -1,4 +1,7 @@
+from random import randint
+
 from sql import User
+
 
 # nickname generator
 def nickname_generator(nickname):
@@ -8,3 +11,11 @@ def nickname_generator(nickname):
         if len(nickname + str(counter)) > 16:
             return nickname_generator('Player')
     return nickname + str(counter)
+
+
+# roll
+async def roll(a, b, rolls=1):
+    result = []
+    for n in range(rolls):
+        result.append(randint(a, b))
+    return result
