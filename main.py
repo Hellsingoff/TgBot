@@ -228,15 +228,11 @@ async def error_log(*args):
 
 # on shutdown
 async def on_shutdown():
-    try:
-        while True:
-            await sleep(120)
-    except CancelledError:
-        log.warning('Reboot!')
-        await send_message(84381379, 'Reboot!')  # tmp 4 test
-        dp.stop_polling()
-        await sleep(15)
-        exit()
+    log.warning('Reboot!')
+    await send_message(84381379, 'Reboot!')  # tmp 4 test
+    dp.stop_polling()
+    await sleep(15)
+    exit()
 
 
 if __name__ == '__main__':
@@ -256,8 +252,4 @@ if __name__ == '__main__':
     try:
         executor.start_polling(dp)
     finally:
-        log.warning('Reboot!')
-        await send_message(84381379, 'Reboot!')  # tmp 4 test
-        dp.stop_polling()
-        await sleep(15)
-        exit()
+        on_shutdown()
