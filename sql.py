@@ -59,7 +59,6 @@ class Door(Model):
                 user.game = self.id
                 user.save()
             else:
-                self.delete_instance()
                 await self.say(f'{user.nickname} joined the game.\n' +
                                'Let\'s play a game...')
                 names = []
@@ -76,6 +75,7 @@ class Door(Model):
                                        players=self.player_list,
                                        names=names,
                                        waiting=waiting)
+                self.delete_instance()
                 await new_game.start()
 
     async def say(self, text):
@@ -125,9 +125,9 @@ class Room(Model):
         game = games[self.game]
         verb = await game.start(self)  # Room.get(Room.id == self.id)
         if 's' in verb:            # fix this
-            self.say()            # fix this
+            await self.say()       # fix this
         if 'w' in verb:            # fix this
-            self.whisper_all()            # fix this
+            await self.whisper_all()  # fix this
 
     async def turn(self, id):
         game = games[self.game]

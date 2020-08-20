@@ -1,9 +1,7 @@
 from os import getenv
-from threading import Thread
 
 from dotenv import load_dotenv
 import logging
-import signal
 from asyncio import sleep, CancelledError
 
 from aiogram import Bot, Dispatcher, executor, types
@@ -20,14 +18,14 @@ game_list = ['bones']
 
 
 # nickname generator
-def nickname_generator(nickname):
+def nickname_generator(name):
     count = 1
-    while sql.User.select().where(sql.User.nickname == nickname + str(count)
+    while sql.User.select().where(sql.User.nickname == f'{name}{count}'
                                   ).exists():
         count += 1
-        if len(nickname + str(count)) > 16:
+        if len(f'{name}{count}') > 16:
             return nickname_generator('Player')
-    return nickname + str(count)
+    return f'{name}{count}'
 
 
 # registration with testing arguments
@@ -238,23 +236,9 @@ async def error_log(*args):
     log.error(f'Error handler: {args}')
 
 
-def shutdown():
-    log.warning('Reboot!')
-    send_message(84381379, 'Reboot!')  # tmp 4 test
-    dp.stop_polling()
-    sleep(20)
-    exit()
-
-
-# on shutdown
-def sig_handler():
-    signal.signal(signal.SIGTERM, shutdown)
-
-
 if __name__ == '__main__':
     log.info('Start.')
     load_dotenv()
-    Thread(target=sig_handler).start()
     dp.loop.create_task(check_mail(dp))
     dp.loop.create_task(msg_counter_reset())
     executor.start_polling(dp)
